@@ -2,12 +2,12 @@
   <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" :ellipsis="false"
     @select="handleSelectMenu">
     <el-menu-item index="0" @click="useRouter().push({ path: '/'  })">
-      <div >Giftopia</div>
+      <div >EzyMeet</div>
     </el-menu-item>
-    <el-menu-item index="1" @click="useRouter().push({ path: '/product/product_list' })">所有產品</el-menu-item>
-    <el-menu-item index="2" @click="useRouter().push({ path: '/order/history' })">訂單查詢</el-menu-item>
+    <!-- <el-menu-item index="1" @click="useRouter().push({ path: '/product/product_list' })">所有產品</el-menu-item>
+    <el-menu-item index="2" @click="useRouter().push({ path: '/order/history' })">訂單查詢</el-menu-item> -->
     <!-- <el-menu-item index="3" @click="useRouter().push({ path: '/member_center' })">會員中心</el-menu-item> -->
-    <el-menu-item index="4" @click="useRouter().push({ path: '/order/cart' })">購物車</el-menu-item>
+    <!-- <el-menu-item index="4" @click="useRouter().push({ path: '/order/cart' })">購物車</el-menu-item> -->
     <el-menu-item v-if="!user" index="5" @click="loginDialogStore.showLoginDialog">登入/註冊</el-menu-item>
     <el-menu-item v-else index="5" @click="logoutDialogVisible = true">登出</el-menu-item>
   </el-menu>
