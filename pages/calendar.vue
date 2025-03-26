@@ -20,50 +20,50 @@
             <!-- </el-button-group> -->
       </template>
     </el-calendar>
-    <el-form ref="meetingFormRef" :model="meeting" label-width="100px">
+    <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form">
       <el-form-item label="標題" label-position="top">
-        <el-input v-model="meeting.title" />
+      <el-input v-model="meeting.title" placeholder="請輸入標題" />
       </el-form-item>
       <el-form-item label="標籤" label-position="top">
-        <el-input v-model="meeting.tag" />
+      <el-input v-model="meeting.tag" placeholder="請輸入標籤" />
       </el-form-item>
       <el-form-item label="開始日期" label-position="top">
-        <el-date-picker v-model="meeting.startDate" type="date" />
+      <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" />
       </el-form-item>
       <el-form-item label="開始時間" label-position="top">
-        <el-time-select v-model="meeting.startTime" step="00:15" />
+      <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" />
       </el-form-item>
       <el-form-item label="結束日期" label-position="top">
-        <el-date-picker v-model="meeting.endDate" type="date" />
+      <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" />
       </el-form-item>
       <el-form-item label="結束時間" label-position="top">
-        <el-time-select v-model="meeting.endTime" step="00:15" />
+      <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" />
       </el-form-item>
       <el-form-item label="地點" label-position="top">
-        <el-input v-model="meeting.location" />
+      <el-input v-model="meeting.location" placeholder="請輸入地點" />
       </el-form-item>
       <el-form-item label="連結" label-position="top">
-        <el-input v-model="meeting.link" />
+      <el-input v-model="meeting.link" placeholder="請輸入連結" />
       </el-form-item>
       <el-form-item label="受邀者" label-position="top" class="invitees">
-        <el-select v-model="meeting.invitees" multiple>
-          <el-option v-for="invitee in invitees" :key="invitee" :label="invitee" :value="invitee" />
-        </el-select>
+      <el-select v-model="meeting.invitees" multiple placeholder="請選擇受邀者">
+        <el-option v-for="invitee in invitees" :key="invitee" :label="invitee" :value="invitee" />
+      </el-select>
       </el-form-item>
       <el-form-item label-position="top" class="agendaItems">
-        <template #label>
-          <div class="flex justify-between items-center">
-            <div>議程項目</div>
-            <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog"></el-button>
-          </div>
-        </template>
+      <template #label>
+        <div class="flex justify-between items-center">
+        <div>議程項目</div>
+        <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog"></el-button>
+        </div>
+      </template>
       </el-form-item>
       <el-form-item label="其他資訊" label-position="top" class="otherInfo">
-        <el-input v-model="meeting.otherInfo" type="textarea" />
+      <el-input v-model="meeting.otherInfo" type="textarea" placeholder="請輸入其他資訊" />
       </el-form-item>
     </el-form>
     <el-dialog v-model="agendaItemDialog" :before-close="handleCloseAgendaItemDialog">
-      <div class="title"></div>
+      <!-- <div class="title"></div> -->
       <el-form ref="agendaItemFormRef" style="" :model="agendaItemForm" label-width="auto"
         status-icon>
         <el-form-item label="標題" prop="title">
@@ -151,12 +151,27 @@ const handleAddAgendaItem = () => {
   max-width: 90vw;
   margin: 0 auto;
 
+  :deep(.el-dialog) {
+    .el-form {
+      width: 100%;
+      
+      .el-form-item {
+        width: 100%;
+        margin-bottom: 15px;
+        
+        .el-input,
+        .el-date-editor,
+        .el-select,
+        .el-time-select {
+          width: 100%;
+        }
+      }
+    }
+  }
+  
   .el-calendar {
-    // width: 100%;
-    // max-width: 800px;
-    width: 45%;
+    width: 60%;
     margin: 0 auto;
-    padding-right: 15px;
   }
 
   >.el-form {
@@ -167,10 +182,27 @@ const handleAddAgendaItem = () => {
     flex-wrap: wrap;
   }
 
+  > .el-form.meeting-form {
+    width: 40%; 
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    
+  }
+
   .el-form-item {
     width: 50%;
     padding: 5px;
     margin-bottom: 5px;
+
+    :deep(.el-input),
+    :deep(.el-date-editor),
+    :deep(.el-select),
+    :deep(.el-time-select) {
+      width: 100%; 
+    }
+
 
     &.invitees,
     &.otherInfo,
