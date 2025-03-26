@@ -1,0 +1,213 @@
+/* tailwind 3 css */
+@use 'tailwindcss/base';
+@use 'tailwindcss/components';
+@use 'tailwindcss/utilities';
+@use 'sass:color';
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap');
+
+html {
+  scroll-behavior: smooth;
+}
+
+section {
+  scroll-margin-top: 64px;
+}
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 16px;
+  line-height: 28px;
+  letter-spacing: 1px;
+}
+
+h1 {
+  font-size: 24px;
+  line-height: 43px;
+  letter-spacing: 3px;
+  font-weight: 900;
+  @include md {
+    font-size: 50px;
+    line-height: 61px;
+    letter-spacing: 7px;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 43px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  @include md {
+    font-size: 40px;
+    line-height: 52px;
+    letter-spacing: 7px;
+  }
+}
+h3 {
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  @include md {
+    font-size: 28px;
+    line-height: 43px;
+    letter-spacing: 3px;
+  }
+}
+h4 {
+  font-size: 16px;
+  line-height: 28px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  @include md {
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: 2px;
+  }
+}
+h5 {
+  font-size: 16px;
+  line-height: 28px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+h6 {
+  font-size: 16px;
+  line-height: 28px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+figure {
+  font-size: 14px;
+}
+
+.page-container {
+  display: flex;
+  min-height: 100vh;
+  padding: 52px 24px 150px;
+  // background-color: #f0f2f5;
+  // height: fit-content;
+  // flex-direction: row !important;
+}
+
+.el-button {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.el-button--primary:not(.is-link) {
+  background-color: $primary !important;
+  border: $primary !important;
+
+  &:hover {
+    background-color: color.adjust($primary, $lightness: -10%) !important;
+    border: color.adjust($primary, $lightness: -10%) !important;
+  }
+}
+
+.el-button--success:not(.is-link) {
+  background-color: $secondary !important;
+  border: $secondary !important;
+  color: $primary !important;
+
+  &:hover {
+    background-color: color.adjust($secondary, $lightness: -10%) !important;
+    border: color.adjust($secondary, $lightness: -10%) !important;
+  }
+}
+
+.el-button.is-link {
+  width: auto !important;
+}
+
+.el-progress-bar {
+  .el-progress-bar__inner {
+    background-color: $primary !important;
+  }
+}
+
+.el-steps {
+  // margin: 50px auto;
+
+ .el-step {
+
+    .el-step__head.is-success{
+      color: $primary !important;
+      border-color: $primary !important;
+
+      .el-step__line-inner, .el-step__line {
+        background-color: $primary !important;
+      }
+    }
+
+    .el-step__head.is-process{
+      color: #b56088;
+      border-color: #b56088;
+    }
+
+    .el-step__main {
+      .el-step__title {
+        color: $primary !important;
+
+        &.is-wait{
+          color: #A8ABB2 !important;
+        }
+
+        &.is-process{
+          color: #b56088 !important;
+        }
+      }
+
+      
+
+    }
+  }
+}
+
+
+
+.el-dialog{
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px !important;
+  max-width: 450px;
+
+  .title{
+    font-size: 24px;
+    margin: 0 auto 20px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .el-dialog__body{
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  .el-input{
+    padding: 0;
+    margin: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .el-input__wrapper{
+    height: 100%;
+  }
+
+  .el-dialog__footer{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin:0;
+    padding: 0;
+    flex-direction: column;
+
+    .el-button:last-child{
+      margin-top: 0px;
+    }
+  }
+}
