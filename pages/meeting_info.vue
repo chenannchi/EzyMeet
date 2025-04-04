@@ -27,22 +27,22 @@
         <el-form-item label="連結" label-position="top">
           <el-input v-model="meeting.link" placeholder="請輸入連結" />
         </el-form-item>
-        <el-form-item label="出席者" label-position="top" class="attendees">
+        <el-form-item label="出席者" label-position="top" class="attendees !w-full">
           <el-select v-model="meeting.attendees" multiple placeholder="請選擇出席者">
             <el-option v-for="attendee in attendees" :key="attendee" :label="attendee" :value="attendee" />
           </el-select>
         </el-form-item>
-        <el-form-item label="不出席者" label-position="top" class="absentees">
+        <el-form-item label="不出席者" label-position="top" class="absentees !w-full">
           <el-select v-model="meeting.absentees" multiple placeholder="請選擇不出席者">
             <el-option v-for="absentee in absentees" :key="absentee" :label="absentee" :value="absentee" />
           </el-select>
         </el-form-item>
-        <el-form-item label="尚未回覆者" label-position="top" class="noResponse">
+        <el-form-item label="尚未回覆者" label-position="top" class="noResponse !w-full">
           <el-select v-model="meeting.noResponse" multiple placeholder="請選擇尚未回覆者">
             <el-option v-for="noResponse in noResponses" :key="noResponse" :label="noResponse" :value="noResponse" />
           </el-select>
         </el-form-item>
-        <el-form-item label-position="top" class="agendaItems">
+        <el-form-item label-position="top" class="agendaItems !w-full">
           <template #label>
             <div class="flex justify-between items-center">
               <div>議程項目</div>
@@ -50,16 +50,16 @@
             </div>
           </template>
         </el-form-item>
-      </div>
-      <div>
-        <el-form-item label="其他資訊" label-position="top" class="otherInfo">
+        <el-form-item label="其他資訊" label-position="top" class="otherInfo !w-full">
           <el-input v-model="meeting.otherInfo" type="textarea" placeholder="請輸入其他資訊" />
         </el-form-item>
+      </div>
+      <div>
         <el-form-item label="會議記錄" label-position="top" class="meetingNotes">
-          <el-input v-model="meeting.meetingNotes" type="textarea" placeholder="請輸入會議記錄" />
+          <el-input v-model="meeting.meetingNotes" type="textarea" placeholder="請輸入會議記錄" :rows="25" />
         </el-form-item>
         <el-form-item label="留言" label-position="top" class="comments">
-          <el-input v-model="meeting.comments" type="textarea" placeholder="請輸入留言" />
+          <el-input v-model="meeting.comments" type="textarea" placeholder="請輸入留言" :rows="5" />
         </el-form-item>
         <!-- *使用者留言區 -->
         <!-- <div class="flex justify-center items-center">
@@ -138,8 +138,10 @@ const handleOpenItemDialog = () => {
     >div:last-child {
       display: flex;
       width: 50%;
-      flex-wrap: wrap;
-      // flex-direction: column;
+      // flex-wrap: wrap;
+      // justify-content: flex-start;
+      // align-items: flex-start;
+      flex-direction: column;
       // gap: 20px;
       >*{
         width: 100%;
