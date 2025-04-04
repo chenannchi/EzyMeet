@@ -115,13 +115,37 @@ const handleOpenItemDialog = () => {
   margin: 0 auto;
 
   .meeting-form {
-    width: 80%;
-    max-width: 800px;
+    width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    flex-direction: column;
+    // flex-direction: column;
     gap: 20px;
     // height: 100vh;
+
+    >div:first-child {
+      display: flex;
+      // flex-direction: column;
+      width: 50%;
+      // gap: 20px;
+      flex-wrap: wrap;
+
+      >*{
+        width: 50%;
+        padding: 0 10px;
+      }
+    }
+    >div:last-child {
+      display: flex;
+      width: 50%;
+      flex-wrap: wrap;
+      // flex-direction: column;
+      // gap: 20px;
+      >*{
+        width: 100%;
+        padding: 0 10px;
+      }
+    }
   }
 }
 </style>
