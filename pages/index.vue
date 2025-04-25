@@ -3,21 +3,43 @@
     <div class="flex justify-center items-center">
       <img src="/logo/ezymeet_logo.png" alt="logo" />
     </div>
-    <CustomButton :type="'primary'" class="!mr-auto !w-auto" @click="handleLogin">登入
+    <CustomButton :type="'primary'" class="!mr-auto !w-auto" v-if="!user && !isLoading" @click="handleLogin">使用 Google 登入
     </CustomButton>
+    <div v-else-if="user">
+      <p>歡迎，{{ user.displayName }}！</p>
+      <CustomButton :type="'primary'" @click="logout">登出</CustomButton>
+      <p>使用者 ID: {{ user.uid }}</p>
+    </div>
+    <p v-else>載入中…</p>
   </div>
   
 </template>
 <script setup lang="ts">
 import type { Product } from '~/types/interfaces';
-
+import { useAuth } from '~/composables/useAuth'
 useHead({
-  title: '首页'
+  title: '首頁'
 })
 
+const { user, isLoading, login, logout, getIdToken } = useAuth()
 
+const router = useRouter()
 
+const handleLogin = async () => {
+  try {
+    // 模擬登入 API 呼叫
+    const response = await login()
 
+    if (user) {
+      router.push('/calendar')
+    } else {
+      alert('登入失敗')
+    }
+  } catch (error) {
+    console.error('登入錯誤:', error)
+    alert('發生錯誤')
+  }
+}
 </script>
 <style scoped lang="scss">
 .page-container {
