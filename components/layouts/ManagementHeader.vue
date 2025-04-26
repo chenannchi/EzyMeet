@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import {Search} from '@element-plus/icons-vue';
 
-const userStore = useUserStore();
+// const userStore = useUserStore();
 
 const activeIndex = ref('1')
 const handleSelect = (index: string) => {
@@ -38,7 +38,7 @@ const handleCloseLogoutDialog = () => {
 
 const handleLogout = () => {
   logoutDialogVisible.value = false;
-  userStore.clearUser();
+  // userStore.clearUser();
   // console.log('userStore.user', userStore.user);
   useRouter().push({ path: '/management' });
 };
