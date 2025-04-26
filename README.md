@@ -52,4 +52,5 @@ EzyMeet-Frontend/
 
 ## Contributor
 [Anchi Chen](https://github.com/chenannchi)
+<br/>
 [Chien Pei Lun](https://github.com/pei-lun-chien)
