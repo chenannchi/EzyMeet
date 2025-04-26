@@ -29,8 +29,7 @@ const router = useRouter()
 
 const handleLogin = async () => {
   try {
-    // 模擬登入 API 呼叫
-    const response = await login()
+    await login()
 
     if (user) {
       router.push('/calendar')
