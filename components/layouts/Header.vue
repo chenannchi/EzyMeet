@@ -78,7 +78,9 @@
 
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus';
-import type { User } from '~/types/interfaces';
+
+
+const { user, isLoading, login, logout, getIdToken } = useAuth()
 const activeIndex = ref('1')
 const loginDialogVisible = ref(false);
 const registerDialogVisible = ref(false);
@@ -88,7 +90,7 @@ const loginRuleFormRef = ref<FormInstance | null>(null);
 const registerRuleFormRef = ref<FormInstance | null>(null);
 
 const loginDialogStore = useLoginDialogStore();
-const userStore = useUserStore();
+// const userStore = useUserStore();
 
 /**
  * TODO: 登入狀態
@@ -117,21 +119,26 @@ const handleCloseLogoutDialog = () => {
   logoutDialogVisible.value = false;
 };
 
-const user = computed(() => userStore.user);
+// const user = computed(() => userStore.user);
 
 async function handleLogin() {
   
   try {
-    await userStore.login(loginRuleForm.account, loginRuleForm.pwd);
+    await login();
     loginDialogStore.hideLoginDialog();
   } catch (error) {
     console.error('Failed to login:', error);
   }
 }
 
-const handleLogout = () => {
-  logoutDialogVisible.value = false;
-  userStore.clearUser();
+async function handleLogout() {
+  try {
+    await logout();
+    logoutDialogVisible.value = false;
+  } catch (error) {
+    console.error('Failed to logout:', error);
+  }
+
   useRouter().push({ path: '/' });
 };
 
@@ -241,7 +248,7 @@ const registerRules = {
 };
 
 onMounted(() => {
-  userStore.loadUserFromLocalStorage();
+  
 });
 </script>
 

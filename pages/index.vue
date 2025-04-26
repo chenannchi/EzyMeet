@@ -8,20 +8,23 @@
     <div v-else-if="user">
       <p>歡迎，{{ user.displayName }}！</p>
       <CustomButton :type="'primary'" @click="logout">登出</CustomButton>
-      <p>使用者 ID: {{ user.uid }}</p>
     </div>
-    <p v-else>載入中…</p>
+    <p v-else v-loading="loading"></p>
   </div>
   
 </template>
 <script setup lang="ts">
 import type { Product } from '~/types/interfaces';
 import { useAuth } from '~/composables/useAuth'
+
 useHead({
   title: '首頁'
 })
 
 const { user, isLoading, login, logout, getIdToken } = useAuth()
+
+const loading = ref(true)
+
 
 const router = useRouter()
 
