@@ -14,7 +14,6 @@
   
 </template>
 <script setup lang="ts">
-import type { Product } from '~/types/interfaces';
 import { useAuth } from '~/composables/useAuth'
 
 useHead({
