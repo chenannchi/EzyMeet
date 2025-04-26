@@ -6,8 +6,8 @@
     <CustomButton :type="'primary'" class="!mr-auto !w-auto" v-if="!user && !isLoading" @click="handleLogin">使用 Google 登入
     </CustomButton>
     <div v-else-if="user">
-      <p>歡迎，{{ user.displayName }}！</p>
-      <CustomButton :type="'primary'" @click="logout">登出</CustomButton>
+      <p id="welcome-statement">Welcome to EzyMeet！ <br/>{{ user.displayName }}</p>
+      <!-- <CustomButton :type="'primary'" @click="logout">登出</CustomButton> -->
     </div>
     <p v-else v-loading="loading"></p>
   </div>
@@ -60,6 +60,17 @@ const handleLogin = async () => {
     width: 80%;
     max-width: 800px;
     margin: 0 auto;
+  }
+
+  #welcome-statement {
+    font-size: 45px;
+    font-weight: 500;
+    color: $primary;
+    margin-top: 20px;
+    padding-bottom:60px;
+    line-height: normal;
+    text-align: center;
+    font-family: "Fraunces", serif;
   }
 }
 
