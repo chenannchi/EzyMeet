@@ -64,7 +64,7 @@ const handleLogin = async () => {
   #welcome-statement {
     font-size: 45px;
     font-weight: 500;
-    color: #435daa;
+    color: $primary;
     margin-top: 20px;
     padding-bottom:60px;
     line-height: normal;
