@@ -1,48 +1,55 @@
-# Giftopia-Frontend
+# EzyMeet-Frontend
 
-這個專案是使用 Nuxt 建立的。更多資訊請參考 [Nuxt 文件](https://nuxt.com/docs/getting-started/introduction)。
+This project is built using Nuxt. For more information, refer to the [Nuxt Documentation](https://nuxt.com/docs/getting-started/introduction).
 
-## 設定
+# EzyMeet-BackEnd
+[EzyMeet-BackEnd](https://github.com/chenannchi/EzyMeet-BackEnd)
 
-使用你偏好的套件管理器來安裝依賴項：
+## Setup
+
+Install dependencies using your preferred package manager:
 
 ```bash
 npm install
 ```
 
-## 開發伺服器
+## Development Server
 
-要啟動開發伺服器，請運行以下命令並在瀏覽器中打開 `http://localhost:3000`：
+To start the development server, run the following command and open `http://localhost:3000` in your browser:
 
 ```bash
 npm run dev
 ```
 
-## 使用工具
+## Tools Used
 
-這個專案使用了以下工具和庫：
+This project utilizes the following tools and libraries:
 
-- **Nuxt**：一個用於創建 Vue.js 應用的框架。
-- **Vue.js**：一個漸進式的 JavaScript 框架，用於構建用戶界面。
-- **Node.js**：一個基於 Chrome V8 JavaScript 引擎的 JavaScript 運行時。
-- **npm**：一個 JavaScript 的套件管理器。
-- **Sass**：一個預處理腳本語言，可解釋或編譯為 CSS。
-- **Git**：一個分佈式版本控制系統。
-- **GitHub**：一個用於版本控制和協作的平台。
-- **Visual Studio Code**：由 Microsoft 製作的源代碼編輯器。
+- **Nuxt**: A framework for building Vue.js applications.
+- **Vue.js**: A progressive JavaScript framework for building user interfaces.
+- **Node.js**: A JavaScript runtime built on Chrome's V8 JavaScript engine.
+- **npm**: A package manager for JavaScript.
+- **Sass**: A preprocessor scripting language that is interpreted or compiled into CSS.
+- **Git**: A distributed version control system.
+- **GitHub**: A platform for version control and collaboration.
+- **Visual Studio Code**: A source code editor developed by Microsoft.
 
-## 項目結構
+## Project Structure
 
 ```
-Giftopia-Frontend/
-├── assets/         # 靜態資源，如圖片、樣式等
-├── components/     # Vue 組件
-├── layouts/        # Nuxt 布局
-├── middleware/     # 中間件
-├── pages/          # 頁面組件
-├── plugins/        # 插件
-├── static/         # 靜態文件
-├── store/          # Vuex 狀態管理
-├── nuxt.config.js  # Nuxt 配置文件
-└── package.json    # 項目依賴和腳本
+EzyMeet-Frontend/
+├── assets/         # Static assets like images and styles
+├── components/     # Vue components
+├── layouts/        # Nuxt layouts
+├── middleware/     # Middleware
+├── pages/          # Page components
+├── plugins/        # Plugins
+├── static/         # Static files
+├── store/          # Vuex state management
+├── nuxt.config.js  # Nuxt configuration file
+└── package.json    # Project dependencies and scripts
 ```
+
+## Contributor
+[Anchi Chen](https://github.com/chenannchi)
+[Chien Pei Lun](https://github.com/pei-lun-chien)
