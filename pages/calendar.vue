@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <el-calendar v-model="value">
+    <el-calendar ref="calendar">
       <template #header="{ date }">
 
         <!-- <el-button-group class="w-full"> -->
@@ -86,7 +86,15 @@
 
 </template>
 <script setup lang="ts">
-import type { Product } from '~/types/interfaces';
+import { ref } from 'vue'
+import type { CalendarDateType, CalendarInstance } from 'element-plus'
+
+const calendar = ref<CalendarInstance>()
+const selectDate = (val: CalendarDateType) => {
+  if (!calendar.value) return
+  calendar.value.selectDate(val)
+}
+
 import {
   Plus
 } from '@element-plus/icons-vue'
@@ -138,6 +146,26 @@ const handleAddAgendaItem = () => {
   meeting.value.agendaItems.push(agendaItemForm.value)
   agendaItemDialog.value = false
 }
+
+const invitees = ref([
+  'Alice',
+  'Bob',
+  'Charlie',
+  'David',
+  'Eve',
+  'Frank',
+  'Grace',
+  'Heidi',
+  'Ivan',
+  'Judy',
+  'Mallory',
+  'Niaj',
+  'Olivia',
+  'Peggy',
+  'Rupert',
+  'Sybil',
+  'Trent',
+])
 
 </script>
 <style scoped lang="scss">
