@@ -165,23 +165,7 @@ const handleCloseAgendaItemDialog = () => {
   agendaItemDialog.value = false
 }
 
-const validateEndTime = (rule: any, value: string, callback: Function) => {
-  if (!value) {
-    return callback(new Error('請選擇結束時間'));
-  }else if (agendaItemForm.value.startTime && value <= agendaItemForm.value.startTime) {
-    return callback(new Error('結束時間必須晚於開始時間'));
-  }
-  callback();
-};
 
-const validateStartTime = (rule: any, value: string, callback: Function) => {
-  if (!value) {
-    return callback(new Error('請選擇開始時間'));
-  }else if (agendaItemForm.value.endTime && value >= agendaItemForm.value.endTime) {
-    return callback(new Error('開始時間必須早於結束時間'));
-  }
-  callback();
-};
 
 const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
@@ -220,6 +204,24 @@ const tableData = ref<any[]>([]);
 const attendees = ref<string[]>(['John Doe', 'Jane Smith']); // Example data
 const absentees = ref<string[]>(['Alice Johnson', 'Bob Brown']); // Example data
 const noResponses = ref<string[]>(['Charlie Davis', 'Dana White']); // Example data
+
+const validateEndTime = (rule: any, value: string, callback: Function) => {
+  if (!value) {
+    return callback(new Error('請選擇結束時間'));
+  } else if (agendaItemForm.value.startTime && value <= agendaItemForm.value.startTime) {
+    return callback(new Error('結束時間必須晚於開始時間'));
+  }
+  callback();
+};
+
+const validateStartTime = (rule: any, value: string, callback: Function) => {
+  if (!value) {
+    return callback(new Error('請選擇開始時間'));
+  } else if (agendaItemForm.value.endTime && value >= agendaItemForm.value.endTime) {
+    return callback(new Error('開始時間必須早於結束時間'));
+  }
+  callback();
+};
 
 onMounted(() => {
   tableData.value = fakeTableData.value.map((item) => {
