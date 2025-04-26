@@ -7,7 +7,6 @@
     </CustomButton>
     <div v-else-if="user">
       <p id="welcome-statement">Welcome to EzyMeet！ <br/>{{ user.displayName }}</p>
-      <!-- <CustomButton :type="'primary'" @click="logout">登出</CustomButton> -->
     </div>
     <p v-else v-loading="loading"></p>
   </div>
@@ -23,8 +22,6 @@ useHead({
 const { user, isLoading, login, logout, getIdToken } = useAuth()
 
 const loading = ref(true)
-
-
 const router = useRouter()
 
 const handleLogin = async () => {
