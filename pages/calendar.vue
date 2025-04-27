@@ -19,14 +19,14 @@
         <el-form-item label="標籤" label-position="top">
           <el-input v-model="meeting.tag" placeholder="請輸入標籤" />
         </el-form-item>
-        <el-form-item label="開始日期" label-position="top">
-          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" />
+        <el-form-item label="開始日期" label-position="top" :rules="[{ validator: validateStartDate, trigger: 'change' }]">
+          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate"/>
         </el-form-item>
         <el-form-item label="開始時間" label-position="top">
           <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" />
         </el-form-item>
-        <el-form-item label="結束日期" label-position="top">
-          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" />
+        <el-form-item label="結束日期" label-position="top" :rules="[{ validator: validateEndDate, trigger: 'change' }]">
+          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled-date="disabledDate"/>
         </el-form-item>
         <el-form-item label="結束時間" label-position="top">
           <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" />
@@ -222,13 +222,13 @@ async function handleCreateMeeting() {
 
   originalStartDate.setHours(startHours);
   originalStartDate.setMinutes(startMinutes);
-  originalStartDate.setSeconds(0); // Optional: Set seconds to 0
-  originalStartDate.setMilliseconds(0); // Optional: Set milliseconds to 0
+  originalStartDate.setSeconds(0);
+  originalStartDate.setMilliseconds(0);
 
   originalEndDate.setHours(endHours);
   originalEndDate.setMinutes(endMinutes);
-  originalEndDate.setSeconds(0); // Optional: Set seconds to 0
-  originalEndDate.setMilliseconds(0); // Optional: Set milliseconds to 0
+  originalEndDate.setSeconds(0);
+  originalEndDate.setMilliseconds(0);
 
   const startTimeStamp = new Date(originalStartDate.getTime()).toISOString();
   const endTimeStamp = new Date(originalEndDate.getTime()).toISOString();
@@ -327,6 +327,24 @@ const validateStartTime = (rule: any, value: string, callback: Function) => {
   callback();
 };
 
+const validateStartDate = (rule: any, value: string, callback: Function) => {
+  if (!value) {
+    return callback(new Error('請選擇開始日期'));
+  } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
+    return callback(new Error('開始日期必須早於結束日期'));
+  }
+  callback();
+};
+
+const validateEndDate = (rule: any, value: string, callback: Function) => {
+  if (!value) {
+    return callback(new Error('請選擇結束日期'));
+  } else if (meeting.value.startDate && new Date(value) < new Date(meeting.value.startDate)) {
+    return callback(new Error('結束日期必須晚於開始日期'));
+  }
+  callback();
+};
+
 const invitees = ref()
 
 
@@ -336,6 +354,12 @@ const fakeUsers = [
   { id: '3', googleId: 'google3', userName: 'User Three', email: 'userthree@example.com' },
   { id: '4', googleId: 'google4', userName: 'User Four', email: 'userfour@example.com' }
 ]
+
+const disabledDate = (time: Date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to the start of today
+  return time.getTime() < today.getTime();
+}
 
 onMounted(() => {
   invitees.value = fakeUsers.map((user) => ({
