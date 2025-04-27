@@ -92,6 +92,7 @@
         </div> -->
       </div>
     </el-form>
+    <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-full">刪除會議</el-button>
   </div>
   <el-dialog v-model="agendaItemDialog" :before-close="handleCloseAgendaItemDialog">
     <!-- <div class="title"></div> -->
@@ -112,6 +113,15 @@
       </el-button>
     </template>
   </el-dialog>
+  <el-dialog title="刪除會議" v-model="deleteMeetingDialog" width="30%" :before-close="handleCloseDeleteMeetingDialog">
+    <p>確定要刪除這個會議嗎？</p>
+    <template #footer>
+      <div class="flex justify-center items-center gap-2 mt-8">
+        <el-button type="info" @click="deleteMeetingDialog = false" class="!mt-0">取消</el-button>
+        <el-button type="primary" @click="handleDeleteMeeting()" >刪除</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -126,6 +136,11 @@ const id = route.params.meetingId as string;
 useHead({
   title: '會議資訊'
 });
+
+const deleteMeetingDialog = ref(false)
+const handleCloseDeleteMeetingDialog = () => {
+  deleteMeetingDialog.value = false;
+}
 
 const meeting = ref<any>({
   title: '',
@@ -227,6 +242,20 @@ const validateStartTime = (rule: any, value: string, callback: Function) => {
   callback();
 };
 
+async function handleDeleteMeeting() {
+  try {
+    // await deleteMeeting(id);
+    console.log('刪除會議', id);
+    // 這裡可以添加刪除會議的邏輯
+  } catch (error) {
+    console.error('刪除會議失敗', error);
+  } finally {
+    deleteMeetingDialog.value = false;
+  }
+}
+
+
+
 onMounted(() => {
   tableData.value = fakeTableData.value.map((item) => {
     return {
@@ -245,7 +274,7 @@ onMounted(() => {
   flex-direction: column;
   width: 100%;
   gap: 20px;
-  max-width: 60vw;
+  max-width: 1200px;
   margin: 0 auto;
 
   .meeting-form {
