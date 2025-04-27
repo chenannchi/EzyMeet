@@ -7,6 +7,10 @@
     </CustomButton>
     <div v-else-if="user">
       <p id="welcome-statement">Welcome to EzyMeet！ <br/>{{ user.displayName }}</p>
+      <div class="flex justify-center w-full">
+      <CustomButton :type="'primary'" class="!w-auto" @click="toCalendar">進入會議管理頁面
+      </CustomButton>
+      </div>
     </div>
     <p v-else v-loading="loading"></p>
   </div>
@@ -23,6 +27,10 @@ const { user, isLoading, login, logout, getIdToken } = useAuth()
 
 const loading = ref(true)
 const router = useRouter()
+
+const toCalendar = () => {
+  router.push('/calendar')
+}
 
 const handleLogin = async () => {
   try {
