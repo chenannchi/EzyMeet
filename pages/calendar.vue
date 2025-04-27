@@ -17,7 +17,7 @@
           <el-input v-model="meeting.title" placeholder="請輸入標題" />
         </el-form-item>
         <el-form-item label="標籤" label-position="top">
-          <el-input v-model="meeting.tag" placeholder="請輸入標籤" />
+          <el-input v-model="meeting.label" placeholder="請輸入標籤" />
         </el-form-item>
         <el-form-item label="開始日期" label-position="top" :rules="[{ validator: validateStartDate, trigger: 'change' }]">
           <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate"/>
@@ -74,8 +74,8 @@
             </el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="其他資訊" label-position="top" class="otherInfo">
-          <el-input v-model="meeting.otherInfo" type="textarea" placeholder="請輸入其他資訊" />
+        <el-form-item label="其他資訊" label-position="top" class="description">
+          <el-input v-model="meeting.description" type="textarea" placeholder="請輸入其他資訊" />
         </el-form-item>
       </el-form>
       <el-button type="primary" @click="handleCreateMeeting" class="!w-full">完成新增會議</el-button>
@@ -128,7 +128,7 @@ const selectDate = (val: CalendarDateType) => {
 
 const meeting = ref<any>({
   title: '',
-  tag: '',
+  label: '',
   startDate: '',
   startTime: '',
   endDate: '',
@@ -137,7 +137,7 @@ const meeting = ref<any>({
   link: '',
   invitees: [],
   agendaItems: [],
-  otherInfo: '',
+  description: '',
 })
 
 const agendaItemDialog = ref(false)
@@ -241,7 +241,7 @@ async function handleCreateMeeting() {
   createMode.value = false
   console.log('body', JSON.stringify({
     title: meeting.value.title,
-    label: meeting.value.tag,
+    label: meeting.value.label,
     startDate: startTimeStamp,
     endDate: endTimeStamp,
     location: meeting.value.location,
@@ -255,7 +255,7 @@ async function handleCreateMeeting() {
       }))
     }],
     // agendaItems: tableData.value,
-    description: meeting.value.otherInfo,
+    description: meeting.value.description,
   }),)
 
   try {
@@ -267,7 +267,7 @@ async function handleCreateMeeting() {
       body:
         JSON.stringify({
           title: meeting.value.title,
-          label: meeting.value.tag,
+          label: meeting.value.label,
           timeslot: {
             startDate: startTimeStamp,
             endDate: endTimeStamp,
@@ -283,7 +283,7 @@ async function handleCreateMeeting() {
 
 
           // agendaItems: tableData.value,
-          description: meeting.value.otherInfo,
+          description: meeting.value.description,
         }),
     });
 
@@ -359,6 +359,16 @@ const disabledDate = (time: Date) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset time to the start of today
   return time.getTime() < today.getTime();
+}
+
+const fakeMeeting = {
+  title: '會議標題',
+  label: '會議標籤',
+  startDate: '2023-10-01',
+  startTime: '09:00',
+  endDate: '2023-10-01',
+  endTime: '10:00',
+  location: '會議室A',
 }
 
 onMounted(() => {
@@ -447,7 +457,7 @@ onMounted(() => {
 
 
     &.invitees,
-    &.otherInfo,
+    &.description,
     &.agendaItems {
       width: 100%;
     }
