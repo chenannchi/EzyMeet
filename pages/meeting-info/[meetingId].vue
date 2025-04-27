@@ -2,7 +2,7 @@
   <div class="page-container">
     <div class="flex justify-between items-center w-full">
       <div class="text-2xl font-bold w-full">會議資訊</div>
-      <el-button type="secondary" @click="$router.push('/calendar')" class="!w-[120px]">返回日曆</el-button>
+      <el-button type="default" @click="$router.push('/calendar')" class="!w-[120px]">返回日曆</el-button>
       <el-button v-if="mode === 'read'" type="primary" class="mr-auto !w-[120px]" @click="mode = 'edit'">
         編輯
       </el-button>
