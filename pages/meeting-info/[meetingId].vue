@@ -6,7 +6,7 @@
       <el-button v-if="mode === 'read'" type="primary" class="mr-auto !w-[120px]" @click="mode = 'edit'">
         編輯
       </el-button>
-      <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="updateMeeting">
+      <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="mode.value = 'read';">
         儲存
       </el-button>
       <el-button v-if="mode === 'edit'" type="info" class="mr-auto !w-[120px]" @click="cancelEdit">
@@ -104,7 +104,6 @@
     <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-[120px]">刪除會議</el-button>
   </div>
   <el-dialog v-model="agendaItemDialog" :before-close="handleCloseAgendaItemDialog">
-    <!-- <div class="title"></div> -->
     <el-form ref="agendaItemFormRef" style="" :model="agendaItemForm" label-width="auto" status-icon>
       <el-form-item label="標題" prop="title">
         <el-input v-model="agendaItemForm.title" placeholder="請輸入標題" />
@@ -139,18 +138,18 @@ import { Plus, DeleteFilled, Edit } from '@element-plus/icons-vue';
 import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
 import { useRoute } from 'vue-router';
 
-const mode = ref<'read' | 'edit'>('read'); // Default to 'read' mode
-const route = useRoute();
-const id = route.params.meetingId as string;
-
 useHead({
   title: '會議資訊'
 });
 
+const mode = ref<'read' | 'edit'>('read');
+const route = useRoute();
+const id = route.params.meetingId as string;
+
+const agendaItemFormRef = ref<any>(null)
+const tableData = ref<any[]>([]);
 const deleteMeetingDialog = ref(false)
-const handleCloseDeleteMeetingDialog = () => {
-  deleteMeetingDialog.value = false;
-}
+const agendaItemDialog = ref(false)
 
 const meeting = ref<any>({
   title: '',
@@ -168,10 +167,6 @@ const meeting = ref<any>({
   otherInfo: '',
 });
 
-const agendaItemDialog = ref(false)
-
-const agendaItemFormRef = ref<any>(null)
-
 const agendaItemForm = ref<any>({
   title: '',
   startTime: '',
@@ -179,12 +174,10 @@ const agendaItemForm = ref<any>({
 })
 
 const handleOpenItemDialog = () => {
-  // console.log('open item dialog')
   agendaItemDialog.value = true
 }
 
 const handleCloseAgendaItemDialog = () => {
-  // console.log('close item dialog')
   agendaItemForm.value = {
     title: '',
     startTime: '',
@@ -194,12 +187,9 @@ const handleCloseAgendaItemDialog = () => {
   agendaItemDialog.value = false
 }
 
-
-
 const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
     if (valid) {
-
       console.log('add agenda item');
       tableData.value.push(agendaItemForm.value);
       agendaItemDialog.value = false;
@@ -210,29 +200,108 @@ const handleAddAgendaItem = () => {
 };
 
 const handleEditAgendaItem = (row: any) => {
-  console.log('edit agenda item', row)
   agendaItemForm.value = row
   agendaItemDialog.value = true
 }
 
 const handleDeleteAgendaItem = (row: any) => {
-  console.log('delete agenda item', row)
   const index = tableData.value.indexOf(row)
   if (index > -1) {
     tableData.value.splice(index, 1)
   }
 }
 
-const fakeTableData = ref([
-  { id: 1, title: '會議議程1', startTime: '09:00', endTime: '10:00' },
-  { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
-]);
+const handleCloseDeleteMeetingDialog = () => {
+  deleteMeetingDialog.value = false;
+}
 
-const tableData = ref<any[]>([]);
+const cancelEdit = () => {
+  mode.value = 'read';
+  meeting.value = {
+    title: '',
+    label: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    location: '',
+    link: '',
+    attendees: [],
+    absentees: [],
+    noResponse: [],
+    agendaItems: [],
+    otherInfo: '',
+  };
+};
 
-const attendees = ref<string[]>(['John Doe', 'Jane Smith']); // Example data
-const absentees = ref<string[]>(['Alice Johnson', 'Bob Brown']); // Example data
-const noResponses = ref<string[]>(['Charlie Davis', 'Dana White']); // Example data
+/**
+* TODO: meetId 要更換成真實的 meetId 
+* */
+const handleDeleteMeeting = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/meetings/delete/${"TMpNeQfNW3jvLjNDaFlW"}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const responseData = await response.json();
+
+    if (response.status === 200) {
+      ElMessage({
+        message: `成功刪除${responseData.title}會議!`,
+        type: 'success',
+      })
+      router.push({ path: '/calendar' })
+    } else {
+      ElMessage.error(`會議刪除失敗`)
+    }
+  } catch (error) {
+    console.error('會議刪除請求失敗', error);
+  }
+
+  deleteMeetingDialog.value = false;
+
+}
+
+/**
+ * TODO: 抓取確切的人的email，並顯示在select裡
+ */
+const fetchSingleMeeting = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/meetings/meeting/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const responseData = await response.json();
+
+    if (response.status === 200) {
+      meeting.value = {
+        title: responseData.meeting.title,
+        label: responseData.meeting.label,
+        startDate: responseData.meeting.timeslot.startDate.split('T')[0],
+        startTime: responseData.meeting.timeslot.startDate.split('T')[1].split('+')[0],
+        endDate: responseData.meeting.timeslot.endDate.split('T')[0],
+        endTime: responseData.meeting.timeslot.endDate.split('T')[1].split('+')[0],
+        location: responseData.meeting.location,
+        link: responseData.meeting.link,
+        attendees: responseData.accepted,
+        absentees: responseData.declined,
+        noResponse: responseData.invited,
+        agendaItems: responseData.meeting.agendaItems,
+        otherInfo: responseData.meeting.otherInfo,
+      };
+    } else {
+      console.error('會議資訊獲取失敗', responseData);
+    }
+  } catch (error) {
+    console.error('會議資訊請求失敗', error);
+  }
+};
 
 const validateEndTime = (rule: any, value: string, callback: Function) => {
   if (!value) {
@@ -252,112 +321,17 @@ const validateStartTime = (rule: any, value: string, callback: Function) => {
   callback();
 };
 
-async function handleDeleteMeeting() {
-  /**
-   * TODO: meetId 要更換成真實的 meetId 
-   * */
-  try {
-    const response = await fetch(`http://localhost:8080/meetings/delete/${"TMpNeQfNW3jvLjNDaFlW"}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+const fakeTableData = ref([
+  { id: 1, title: '會議議程1', startTime: '09:00', endTime: '10:00' },
+  { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
+]);
 
-    const responseData = await response.json();
+const attendees = ref<string[]>(['John Doe', 'Jane Smith']);
+const absentees = ref<string[]>(['Alice Johnson', 'Bob Brown']);
+const noResponses = ref<string[]>(['Charlie Davis', 'Dana White']);
 
-    if (response.status === 200) {
-      // console.log('會議刪除成功');
-      ElMessage({
-        message: `成功刪除${responseData.title}會議!`,
-        type: 'success',
-      })
-      router.push({ path: '/calendar' })
-      // Handle success, e.g., redirect to another page or show a success message
-    } else {
-      ElMessage.error(`會議刪除失敗`)
-      // Handle error, e.g., show an error message
-    }
-  } catch (error) {
-    console.error('會議刪除請求失敗', error);
-    // Handle network error, e.g., show an error message
-  }
-
-  deleteMeetingDialog.value = false;
-
-}
-
-const updateMeeting = () => {
-  // Save the changes to the meeting data
-  console.log('儲存會議資訊', meeting.value);
-  mode.value = 'read';
-};
-
-const cancelEdit = () => {
-  mode.value = 'read';
-  // Reset the form to the original meeting data
-  meeting.value = {
-    title: '',
-    label: '',
-    startDate: '',
-    startTime: '',
-    endDate: '',
-    endTime: '',
-    location: '',
-    link: '',
-    attendees: [],
-    absentees: [],
-    noResponse: [],
-    agendaItems: [],
-    otherInfo: '',
-  };
-};
-
-const fetchSingleMeeting = async () => {
-  try {
-    const response = await fetch(`http://localhost:8080/meetings/meeting/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const responseData = await response.json();
-
-    console.log('會議資訊', responseData);
-    console.log('meeting', responseData.meeting);
-
-    if (response.status === 200) {
-      meeting.value = {
-        title: responseData.meeting.title,
-        label: responseData.meeting.label,
-        startDate: responseData.meeting.timeslot.startDate.split('T')[0],
-        startTime: responseData.meeting.timeslot.startDate.split('T')[1].split('+')[0],
-        endDate: responseData.meeting.timeslot.endDate.split('T')[0],
-        endTime: responseData.meeting.timeslot.endDate.split('T')[1].split('+')[0],
-        location: responseData.meeting.location,
-        link: responseData.meeting.link,
-        attendees: responseData.accepted,
-        absentees: responseData.declined,
-        noResponse: responseData.invited,
-        agendaItems: responseData.meeting.agendaItems,
-        otherInfo: responseData.meeting.otherInfo,
-      };
-
-      console.log('會議資訊獲取成功', meeting.value);
-    } else {
-      console.error('會議資訊獲取失敗', responseData);
-    }
-  } catch (error) {
-    console.error('會議資訊請求失敗', error);
-  }
-};
-
-
-
-
-onMounted(async () => {
-  await fetchSingleMeeting(id);
+onMounted( () => {
+  fetchSingleMeeting(id);
   tableData.value = fakeTableData.value.map((item) => {
     return {
       title: item.title,

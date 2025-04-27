@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <el-calendar ref="calendar">
+    <el-calendar ref="calendar" v-if="meetings.length">
       <template #header="{ date }">
         <el-button size="small" @click="selectDate('prev-month')" class="!w-auto">
           < </el-button>
@@ -131,20 +131,16 @@ import type { CalendarDateType, CalendarInstance } from 'element-plus'
 import { Plus, DeleteFilled, Edit, UserFilled } from '@element-plus/icons-vue';
 
 const { user, isLoading, login, logout, getIdToken } = useAuth()
-
-const calendar = ref<CalendarInstance>()
-const createMode = ref(true)
-
 const router = useRouter()
+const calendar = ref<CalendarInstance>()
 
 useHead({
   title: '行事曆'
 })
 
-const selectDate = (val: CalendarDateType) => {
-  if (!calendar.value) return
-  calendar.value.selectDate(val)
-}
+const createMode = ref(true)
+const agendaItemDialog = ref(false)
+const agendaItemFormRef = ref<any>(null)
 
 const meeting = ref<any>({
   title: '',
@@ -160,22 +156,27 @@ const meeting = ref<any>({
   description: '',
 })
 
-const agendaItemDialog = ref(false)
-const agendaItemFormRef = ref<any>(null)
-
 const agendaItemForm = ref<any>({
   title: '',
   startTime: '',
   endTime: '',
 })
 
+
+
+
+
+
+const selectDate = (val: CalendarDateType) => {
+  if (!calendar.value) return
+  calendar.value.selectDate(val)
+}
+
 const handleOpenItemDialog = () => {
-  // console.log('open item dialog')
   agendaItemDialog.value = true
 }
 
 const handleCloseAgendaItemDialog = () => {
-  // console.log('close item dialog')
   agendaItemForm.value = {
     title: '',
     startTime: '',
@@ -185,17 +186,12 @@ const handleCloseAgendaItemDialog = () => {
   agendaItemDialog.value = false
 }
 
-
-
-
 const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
     if (valid) {
       console.log('add agenda item');
       tableData.value.push(agendaItemForm.value);
       agendaItemDialog.value = false;
-
-      // Reset validation after successful addition
       agendaItemFormRef.value.resetFields();
     } else {
       agendaItemFormRef.value.resetFields('startTime');
@@ -220,105 +216,102 @@ const handleDeleteAgendaItem = (row: any) => {
   }
 }
 
+/**
+ * TODO: userId需加入到host attr
+ */
 async function handleCreateMeeting() {
-  console.log('create meeting', meeting.value)
-  const startDate = new Date(meeting.value.startDate)
-  const endDate = new Date(meeting.value.endDate)
-
-  if (startDate > endDate) {
-    alert('結束日期必須大於開始日期')
-    return
-  }
-
-  if (meeting.value.startTime > meeting.value.endTime) {
-    alert('結束時間必須大於開始時間')
-    return
-  }
-
-  const originalStartDate = meeting.value.startDate;
-  const originalTimeString = meeting.value.startTime;
-  const originalEndDate = meeting.value.endDate;
-  const originalEndTimeString = meeting.value.endTime;
-
-  const [startHours, startMinutes] = originalTimeString.split(':').map(Number);
-  const [endHours, endMinutes] = originalEndTimeString.split(':').map(Number);
-
-  originalStartDate.setHours(startHours);
-  originalStartDate.setMinutes(startMinutes);
-  originalStartDate.setSeconds(0);
-  originalStartDate.setMilliseconds(0);
-
-  originalEndDate.setHours(endHours);
-  originalEndDate.setMinutes(endMinutes);
-  originalEndDate.setSeconds(0);
-  originalEndDate.setMilliseconds(0);
-
-  const startTimeStamp = new Date(originalStartDate.getTime()).toISOString();
-  const endTimeStamp = new Date(originalEndDate.getTime()).toISOString();
-
-  console.log('startTimeStamp', startTimeStamp)
-  console.log('endTimeStamp', endTimeStamp)
-
-
-  console.log('meeting', meeting.value)
-  createMode.value = false
-  console.log('body', JSON.stringify({
-    title: meeting.value.title,
-    label: meeting.value.label,
-    startDate: startTimeStamp,
-    endDate: endTimeStamp,
-    location: meeting.value.location,
-    link: meeting.value.link,
-    invitees: [{
-      ...meeting.value.invitees.map((userId: any) => ({
-        id: '',
-        meetingId: '',
-        userId: userId,
-        status: 'INVITED',
-      }))
-    }],
-    // agendaItems: tableData.value,
-    description: meeting.value.description,
-  }),)
-
   try {
+    if (!validateMeetingDates() || !validateMeetingTimes()) return;
+
+    const { startTimeStamp, endTimeStamp } = generateTimestamps();
+    const requestBody = createRequestBody(startTimeStamp, endTimeStamp);
+
+    console.log('Request Body:', JSON.stringify(requestBody));
+
     const response = await fetch('http://localhost:8080/meetings/create', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body:
-        JSON.stringify({
-          title: meeting.value.title,
-          label: meeting.value.label,
-          timeslot: {
-            startDate: startTimeStamp,
-            endDate: endTimeStamp,
-          },
-          location: meeting.value.location,
-          link: meeting.value.link,
-          invitees: meeting.value.invitees.map((userId: any) => ({
-            id: '',
-            meetingId: '',
-            userId: String(userId),
-            status: 'INVITED',
-          })),
-
-
-          // agendaItems: tableData.value,
-          description: meeting.value.description,
-        }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to create meeting');
-    }
+    if (!response.ok) throw new Error('Failed to create meeting');
 
     const data = await response.json();
     console.log('API response:', data);
+
+    resetMeetingForm();
   } catch (error) {
     console.error('Error creating meeting:', error);
   }
+}
+
+function validateMeetingDates() {
+  const startDate = new Date(meeting.value.startDate);
+  const endDate = new Date(meeting.value.endDate);
+
+  if (startDate > endDate) {
+    alert('結束日期必須大於開始日期');
+    return false;
+  }
+  return true;
+}
+
+function validateMeetingTimes() {
+  if (meeting.value.startTime > meeting.value.endTime) {
+    alert('結束時間必須大於開始時間');
+    return false;
+  }
+  return true;
+}
+
+function generateTimestamps() {
+  const startDate = new Date(meeting.value.startDate);
+  const endDate = new Date(meeting.value.endDate);
+
+  const [startHours, startMinutes] = meeting.value.startTime.split(':').map(Number);
+  const [endHours, endMinutes] = meeting.value.endTime.split(':').map(Number);
+
+  startDate.setHours(startHours, startMinutes, 0, 0);
+  endDate.setHours(endHours, endMinutes, 0, 0);
+
+  return {
+    startTimeStamp: startDate.toISOString(),
+    endTimeStamp: endDate.toISOString(),
+  };
+}
+
+function createRequestBody(startTimeStamp, endTimeStamp) {
+  return {
+    title: meeting.value.title,
+    label: meeting.value.label,
+    timeslot: { startDate: startTimeStamp, endDate: endTimeStamp },
+    location: meeting.value.location,
+    link: meeting.value.link,
+    invitees: meeting.value.invitees.map(userId => ({
+      id: '',
+      meetingId: '',
+      userId: String(userId),
+      status: 'INVITED',
+    })),
+    description: meeting.value.description,
+  };
+}
+
+function resetMeetingForm() {
+  createMode.value = false;
+  meeting.value = {
+    title: '',
+    label: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    location: '',
+    link: '',
+    invitees: [],
+    agendaItems: [],
+    description: '',
+  };
 }
 
 
@@ -371,7 +364,6 @@ const validateEndDate = (rule: any, value: string, callback: Function) => {
 };
 
 const handleClickMeeting = (meetingId: number) => {
-  console.log('click meeting', meetingId)
   router.push({
     path: `/meeting-info/${meetingId}`
   })
