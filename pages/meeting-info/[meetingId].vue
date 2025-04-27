@@ -1,5 +1,18 @@
 <template>
   <div class="page-container">
+    <div class="flex justify-between items-center w-full">
+      <div class="text-2xl font-bold w-full">會議資訊</div>
+      <el-button type="secondary" @click="$router.push('/calendar')" class="!w-[120px]">返回日曆</el-button>
+      <el-button v-if="mode === 'read'" type="primary" class="mr-auto !w-[120px]" @click="mode = 'edit'">
+        編輯
+      </el-button>
+      <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="updateMeeting">
+        儲存
+      </el-button>
+      <el-button v-if="mode === 'edit'" type="info" class="mr-auto !w-[120px]" @click="cancelEdit">
+        取消
+      </el-button>
+    </div>"
     <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form">
       <div>
 
@@ -59,16 +72,16 @@
             <el-table-column label="操作" width="60px">
               <template #default="{ row }">
                 <div class="flex justify-center items-center gap-1">
-                  <el-button type="text" @click="handleEditAgendaItem(row)" class="!m-0 !p-0 !w-auto">
-                    <el-icon>
-                      <Edit />
-                    </el-icon>
-                  </el-button>
-                  <el-button type="text" @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto">
-                    <el-icon>
-                      <DeleteFilled />
-                    </el-icon>
-                  </el-button>
+                  <!-- <el-button type="text" @click="handleEditAgendaItem(row)" class="!m-0 !p-0 !w-auto"> -->
+                  <el-icon @click="handleEditAgendaItem(row)" class="!m-0 !p-0 !w-auto !fill-blue-500">
+                    <Edit class="!text-blue-500" />
+                  </el-icon>
+                  <!-- </el-button> -->
+                  <!-- <el-button type="text" @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto"> -->
+                  <el-icon @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto">
+                    <DeleteFilled class="!text-red-500" />
+                  </el-icon>
+                  <!-- </el-button> -->
                 </div>
               </template>
             </el-table-column>
@@ -92,7 +105,7 @@
         </div> -->
       </div>
     </el-form>
-    <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-full">刪除會議</el-button>
+    <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-[120px]">刪除會議</el-button>
   </div>
   <el-dialog v-model="agendaItemDialog" :before-close="handleCloseAgendaItemDialog">
     <!-- <div class="title"></div> -->
@@ -118,7 +131,7 @@
     <template #footer>
       <div class="flex justify-center items-center gap-2 mt-8">
         <el-button type="info" @click="deleteMeetingDialog = false" class="!mt-0">取消</el-button>
-        <el-button type="primary" @click="handleDeleteMeeting()" >刪除</el-button>
+        <el-button type="primary" @click="handleDeleteMeeting()">刪除</el-button>
       </div>
     </template>
   </el-dialog>
@@ -130,6 +143,7 @@ import { Plus, DeleteFilled, Edit } from '@element-plus/icons-vue';
 import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
 import { useRoute } from 'vue-router';
 
+const mode = ref<'read' | 'edit'>('read'); // Default to 'read' mode
 const route = useRoute();
 const id = route.params.meetingId as string;
 
@@ -254,6 +268,31 @@ async function handleDeleteMeeting() {
   }
 }
 
+const updateMeeting = () => {
+  // Save the changes to the meeting data
+  console.log('儲存會議資訊', meeting.value);
+  mode.value = 'read';
+};
+
+const cancelEdit = () => {
+  mode.value = 'read';
+  // Reset the form to the original meeting data
+  meeting.value = {
+    title: '',
+    tag: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    location: '',
+    link: '',
+    attendees: [],
+    absentees: [],
+    noResponse: [],
+    agendaItems: [],
+    otherInfo: '',
+  };
+};
 
 
 onMounted(() => {
