@@ -17,84 +17,88 @@
     <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form">
       <div>
 
-      <el-form-item label="標題" label-position="top">
-        <el-input v-model="meeting.title" placeholder="請輸入標題" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="標籤" label-position="top">
-        <el-input v-model="meeting.tag" placeholder="請輸入標籤" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="開始日期" label-position="top">
-        <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="開始時間" label-position="top">
-        <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="結束日期" label-position="top">
-        <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="結束時間" label-position="top">
-        <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="地點" label-position="top">
-        <el-input v-model="meeting.location" placeholder="請輸入地點" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="連結" label-position="top">
-        <el-input v-model="meeting.link" placeholder="請輸入連結" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="出席者" label-position="top" class="attendees !w-full">
-        <el-select v-model="meeting.attendees" multiple placeholder="請選擇出席者" :disabled="mode === 'read'">
-        <el-option v-for="attendee in attendees" :key="attendee" :label="attendee" :value="attendee" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="不出席者" label-position="top" class="absentees !w-full">
-        <el-select v-model="meeting.absentees" multiple placeholder="請選擇不出席者" :disabled="mode === 'read'">
-        <el-option v-for="absentee in absentees" :key="absentee" :label="absentee" :value="absentee" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="尚未回覆者" label-position="top" class="noResponse !w-full">
-        <el-select v-model="meeting.noResponse" multiple placeholder="請選擇尚未回覆者" :disabled="mode === 'read'">
-        <el-option v-for="noResponse in noResponses" :key="noResponse" :label="noResponse" :value="noResponse" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label-position="top" class="agendaItems !w-full">
-        <template #label>
-        <div class="flex justify-between items-center">
-          <div>議程項目</div>
-          <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog" :disabled="mode === 'read'"></el-button>
-        </div>
-        </template>
-        <el-table :data="tableData" style="width: 100%">
-        <el-table-column prop="title" label="標題" />
-        <el-table-column label="時間">
-          <template #default="{ row }">
-          {{ row.startTime }} - {{ row.endTime }}
+        <el-form-item label="標題" label-position="top">
+          <el-input v-model="meeting.title" placeholder="請輸入標題" :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="標籤" label-position="top">
+          <el-input v-model="meeting.tag" placeholder="請輸入標籤" :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="開始日期" label-position="top">
+          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="開始時間" label-position="top">
+          <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="結束日期" label-position="top">
+          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="結束時間" label-position="top">
+          <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="地點" label-position="top">
+          <el-input v-model="meeting.location" placeholder="請輸入地點" :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="連結" label-position="top">
+          <el-input v-model="meeting.link" placeholder="請輸入連結" :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="出席者" label-position="top" class="attendees !w-full">
+          <el-select v-model="meeting.attendees" multiple placeholder="請選擇出席者" :disabled="mode === 'read'">
+            <el-option v-for="attendee in attendees" :key="attendee" :label="attendee" :value="attendee" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="不出席者" label-position="top" class="absentees !w-full">
+          <el-select v-model="meeting.absentees" multiple placeholder="請選擇不出席者" :disabled="mode === 'read'">
+            <el-option v-for="absentee in absentees" :key="absentee" :label="absentee" :value="absentee" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="尚未回覆者" label-position="top" class="noResponse !w-full">
+          <el-select v-model="meeting.noResponse" multiple placeholder="請選擇尚未回覆者" :disabled="mode === 'read'">
+            <el-option v-for="noResponse in noResponses" :key="noResponse" :label="noResponse" :value="noResponse" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label-position="top" class="agendaItems !w-full">
+          <template #label>
+            <div class="flex justify-between items-center">
+              <div>議程項目</div>
+              <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog"
+                :disabled="mode === 'read'"></el-button>
+            </div>
           </template>
-        </el-table-column>
-        <el-table-column label="操作" width="60px" v-if="mode === 'edit'">
-          <template #default="{ row }">
-          <div class="flex justify-center items-center gap-1">
-            <el-icon @click="handleEditAgendaItem(row)" class="!m-0 !p-0 !w-auto !fill-blue-500" :disabled="mode === 'read'">
-            <Edit class="!text-blue-500" />
-            </el-icon>
-            <el-icon @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto" :disabled="mode === 'read'">
-            <DeleteFilled class="!text-red-500" />
-            </el-icon>
-          </div>
-          </template>
-        </el-table-column>
-        </el-table>
-      </el-form-item>
-      <el-form-item label="其他資訊" label-position="top" class="otherInfo !w-full">
-        <el-input v-model="meeting.otherInfo" type="textarea" placeholder="請輸入其他資訊" :disabled="mode === 'read'" />
-      </el-form-item>
+          <el-table :data="tableData" style="width: 100%">
+            <el-table-column prop="title" label="標題" />
+            <el-table-column label="時間">
+              <template #default="{ row }">
+                {{ row.startTime }} - {{ row.endTime }}
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="60px" v-if="mode === 'edit'">
+              <template #default="{ row }">
+                <div class="flex justify-center items-center gap-1">
+                  <el-icon @click="handleEditAgendaItem(row)" class="!m-0 !p-0 !w-auto !fill-blue-500"
+                    :disabled="mode === 'read'">
+                    <Edit class="!text-blue-500" />
+                  </el-icon>
+                  <el-icon @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto" :disabled="mode === 'read'">
+                    <DeleteFilled class="!text-red-500" />
+                  </el-icon>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-form-item>
+        <el-form-item label="其他資訊" label-position="top" class="otherInfo !w-full">
+          <el-input v-model="meeting.otherInfo" type="textarea" placeholder="請輸入其他資訊" :disabled="mode === 'read'" />
+        </el-form-item>
       </div>
       <div>
-      <el-form-item label="會議記錄" label-position="top" class="meetingNotes">
-        <el-input v-model="meeting.meetingNotes" type="textarea" placeholder="請輸入會議記錄" :rows="25" :disabled="mode === 'read'" />
-      </el-form-item>
-      <el-form-item label="留言" label-position="top" class="comments">
-        <el-input v-model="meeting.comments" type="textarea" placeholder="請輸入留言" :rows="5" :disabled="mode === 'read'" />
-      </el-form-item>
+        <el-form-item label="會議記錄" label-position="top" class="meetingNotes">
+          <el-input v-model="meeting.meetingNotes" type="textarea" placeholder="請輸入會議記錄" :rows="25"
+            :disabled="mode === 'read'" />
+        </el-form-item>
+        <el-form-item label="留言" label-position="top" class="comments">
+          <el-input v-model="meeting.comments" type="textarea" placeholder="請輸入留言" :rows="5"
+            :disabled="mode === 'read'" />
+        </el-form-item>
       </div>
     </el-form>
     <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-[120px]">刪除會議</el-button>
@@ -250,14 +254,34 @@ const validateStartTime = (rule: any, value: string, callback: Function) => {
 
 async function handleDeleteMeeting() {
   try {
-    // await deleteMeeting(id);
-    console.log('刪除會議', id);
-    // 這裡可以添加刪除會議的邏輯
+    const response = await fetch(`http://localhost:8080/meetings/delete/${"TMpNeQfNW3jvLjNDaFlW"}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const responseData = await response.json();
+
+    if (response.status === 200) {
+      // console.log('會議刪除成功');
+      ElMessage({
+        message: `成功刪除${responseData.title}會議!`,
+        type: 'success',
+      })
+      router.push({path:'/calendar'})
+      // Handle success, e.g., redirect to another page or show a success message
+    } else {
+      ElMessage.error(`會議刪除失敗`)
+      // Handle error, e.g., show an error message
+    }
   } catch (error) {
-    console.error('刪除會議失敗', error);
-  } finally {
-    deleteMeetingDialog.value = false;
+    console.error('會議刪除請求失敗', error);
+    // Handle network error, e.g., show an error message
   }
+
+  deleteMeetingDialog.value = false;
+
 }
 
 const updateMeeting = () => {
