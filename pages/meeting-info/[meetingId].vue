@@ -12,7 +12,8 @@
       <el-button v-if="mode === 'edit'" type="info" class="mr-auto !w-[120px]" @click="cancelEdit">
         取消
       </el-button>
-    </div>"
+    </div>
+    <el-divider class="!my-2"></el-divider>
     <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form">
       <div>
 
