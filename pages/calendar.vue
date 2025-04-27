@@ -191,17 +191,20 @@ const handleCloseAgendaItemDialog = () => {
 const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
     if (valid) {
-
       console.log('add agenda item');
       tableData.value.push(agendaItemForm.value);
       agendaItemDialog.value = false;
+
+      // Reset validation after successful addition
+      agendaItemFormRef.value.resetFields();
     } else {
+      agendaItemFormRef.value.resetFields('startTime');
+      agendaItemFormRef.value.resetFields('endTime');
+
       console.log('Validation failed');
     }
   });
-  // meeting.value.agendaItems.push(agendaItemForm.value)
-  // agendaItemDialog.value = false
-}
+};
 
 const handleEditAgendaItem = (row: any) => {
   console.log('edit agenda item', row)
@@ -336,6 +339,7 @@ const validateEndTime = (rule: any, value: string, callback: Function) => {
     return callback(new Error('結束時間必須晚於開始時間'));
   }
   callback();
+  agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
 };
 
 const validateStartTime = (rule: any, value: string, callback: Function) => {
@@ -345,6 +349,7 @@ const validateStartTime = (rule: any, value: string, callback: Function) => {
     return callback(new Error('開始時間必須早於結束時間'));
   }
   callback();
+  agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
 };
 
 const validateStartDate = (rule: any, value: string, callback: Function) => {
