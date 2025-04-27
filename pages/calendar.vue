@@ -90,8 +90,8 @@
         </el-form-item>
       </el-form>
       <div class="flex justify-between items-center gap-2">
-        <el-button type="primary" @click="handleCreateMeeting" class="!w-full">完成新增會議</el-button>
         <el-button type="info" @click="handleCancelCreatingMeeting" class="!w-full">取消新增會議</el-button>
+        <el-button type="primary" @click="handleCreateMeeting" class="!w-full">完成新增會議</el-button>
       </div>
     
     </div>
