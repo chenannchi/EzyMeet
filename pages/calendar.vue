@@ -9,6 +9,24 @@
               >
             </el-button>
       </template>
+      <template #date-cell="{ data }">
+        <p :class="data.isSelected ? 'is-selected' : ''">
+          {{ data.day.split('-')[2] }}
+        </p>
+        <p class="meeting-count flex gap-1 items-center flex-wrap">
+          <!-- <el-icon v-for="i in data.meetingCount" :key="i" class="meeting-icon">
+            <UserFilled />
+          </el-icon> -->
+
+          <!-- <p v-if="getMeetingCount(data.day) > 0" class="meeting-count"> -->
+          <!-- {{ getMeetingCount(data.day) }}  -->
+          <!-- <el-icon v-for="i in getMeetingCount(data.day)"><UserFilled /></el-icon> -->
+        <div v-for="meeting in getSpecificDateMeetingsInfo(data.day)" class="text-sm truncate px-1 border rounded-md"
+          style=" background-color: #9c2e61; color: white; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          {{ meeting.title }}
+        </div>
+        </p>
+      </template>
     </el-calendar>
     <div v-if="createMode" class="create-meeting">
 
@@ -20,13 +38,13 @@
           <el-input v-model="meeting.label" placeholder="請輸入標籤" />
         </el-form-item>
         <el-form-item label="開始日期" label-position="top" :rules="[{ validator: validateStartDate, trigger: 'change' }]">
-          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate"/>
+          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate" />
         </el-form-item>
         <el-form-item label="開始時間" label-position="top">
           <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" />
         </el-form-item>
         <el-form-item label="結束日期" label-position="top" :rules="[{ validator: validateEndDate, trigger: 'change' }]">
-          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled-date="disabledDate"/>
+          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled-date="disabledDate" />
         </el-form-item>
         <el-form-item label="結束時間" label-position="top">
           <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" />
@@ -112,7 +130,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { CalendarDateType, CalendarInstance } from 'element-plus'
-import { Plus, DeleteFilled, Edit } from '@element-plus/icons-vue';
+import { Plus, DeleteFilled, Edit, UserFilled } from '@element-plus/icons-vue';
 const calendar = ref<CalendarInstance>()
 const createMode = ref(true)
 
@@ -274,12 +292,12 @@ async function handleCreateMeeting() {
           },
           location: meeting.value.location,
           link: meeting.value.link,
-            invitees: meeting.value.invitees.map((userId: any) => ({
+          invitees: meeting.value.invitees.map((userId: any) => ({
             id: '',
             meetingId: '',
             userId: String(userId),
             status: 'INVITED',
-            })),
+          })),
 
 
           // agendaItems: tableData.value,
@@ -361,24 +379,114 @@ const disabledDate = (time: Date) => {
   return time.getTime() < today.getTime();
 }
 
-const fakeMeeting = {
-  title: '會議標題',
-  label: '會議標籤',
-  startDate: '2023-10-01',
-  startTime: '09:00',
-  endDate: '2023-10-01',
-  endTime: '10:00',
-  location: '會議室A',
-}
+const fakeMeetings = [
+  {
+    title: 'Team Sync',
+    label: 'Work',
+    timeslot: { startDate: '2025-04-01T09:00:00Z', endDate: '2025-04-01T10:00:00Z' },
+    location: 'Conference Room A',
+    link: 'https://example.com/meeting1',
+    invitees: [
+      { id: '1', meetingId: '1', userId: '1', status: 'INVITED' },
+      { id: '2', meetingId: '1', userId: '2', status: 'INVITED' },
+    ],
+    description: 'Weekly team sync-up meeting.',
+  },
+  {
+    title: 'Project Kickoff',
+    label: 'Work',
+    timeslot: { startDate: '2025-04-01T11:00:00Z', endDate: '2025-04-01T12:00:00Z' },
+    location: 'Conference Room B',
+    link: 'https://example.com/meeting2',
+    invitees: [
+      { id: '3', meetingId: '2', userId: '3', status: 'INVITED' },
+      { id: '4', meetingId: '2', userId: '4', status: 'INVITED' },
+    ],
+    description: 'Kickoff meeting for the new project.',
+  },
+  {
+    title: 'Design Review',
+    label: 'Work',
+    timeslot: { startDate: '2025-04-03T10:00:00Z', endDate: '2025-04-03T11:00:00Z' },
+    location: 'Conference Room C',
+    link: 'https://example.com/meeting3',
+    invitees: [
+      { id: '1', meetingId: '3', userId: '1', status: 'INVITED' },
+      { id: '2', meetingId: '3', userId: '2', status: 'INVITED' },
+    ],
+    description: 'Review of the latest design updates.',
+  },
+  {
+    title: 'Client Presentation',
+    label: 'Work',
+    timeslot: { startDate: '2025-04-02T13:00:00Z', endDate: '2025-04-02T14:00:00Z' },
+    location: 'Conference Room D',
+    link: 'https://example.com/meeting4',
+    invitees: [
+      { id: '3', meetingId: '4', userId: '3', status: 'INVITED' },
+      { id: '4', meetingId: '4', userId: '4', status: 'INVITED' },
+    ],
+    description: 'Presentation for the client on project progress.',
+  },
+  {
+    title: 'Team Retrospective',
+    label: 'Work',
+    timeslot: { startDate: '2025-04-02T15:00:00Z', endDate: '2025-04-02T16:00:00Z' },
+    location: 'Conference Room E',
+    link: 'https://example.com/meeting5',
+    invitees: [
+      { id: '1', meetingId: '5', userId: '1', status: 'INVITED' },
+      { id: '2', meetingId: '5', userId: '2', status: 'INVITED' },
+    ],
+    description: 'Team retrospective to discuss what went well and areas for improvement.',
+  },
+  {
+    title: 'Brainstorming Session',
+    label: 'Work',
+    timeslot: { startDate: '2025-04-02T17:00:00Z', endDate: '2025-04-02T18:00:00Z' },
+    location: 'Conference Room F',
+    link: 'https://example.com/meeting6',
+    invitees: [
+      { id: '3', meetingId: '6', userId: '3', status: 'INVITED' },
+      { id: '4', meetingId: '6', userId: '4', status: 'INVITED' },
+    ],
+    description: 'Brainstorming session for new ideas and strategies.',
+  },
+]
+
+// const getMeetingCount = (date: string) => {
+//   const cellDate = new Date(date);
+//   cellDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+//   return meetings.value.filter(meeting => {
+//     const startDate = new Date(meeting.timeslot.startDate);
+//     const endDate = new Date(meeting.timeslot.endDate);
+//     startDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+//     endDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+//     return cellDate >= startDate && cellDate <= endDate;
+//   }).length;
+// };
+
+const getSpecificDateMeetingsInfo = (date: string) => {
+  const cellDate = new Date(date);
+  cellDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+  const meetingsOnDate = meetings.value.filter(meeting => {
+    const startDate = new Date(meeting.timeslot.startDate);
+    const endDate = new Date(meeting.timeslot.endDate);
+    startDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+    endDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+    return cellDate >= startDate && cellDate <= endDate;
+  });
+  return meetingsOnDate.length > 0
+    ? meetingsOnDate.map(meeting => ({ id: meeting.id, title: meeting.title }))
+    : [];
+};
+
+const meetings = ref([])
 
 onMounted(() => {
-  invitees.value = fakeUsers.map((user) => ({
-    id: user.id,
-    googleId: user.googleId,
-    userName: user.userName,
-    email: user.email,
-  }))
-});
+  meetings.value = fakeMeetings;
+})
+
 
 </script>
 <style scoped lang="scss">
@@ -396,6 +504,19 @@ onMounted(() => {
 
   .el-calendar {
     width: 60%;
+
+    :deep(tr) {
+      height: 150px;
+
+      >* {
+        height: 150px !important;
+
+      }
+
+      .el-calendar-day{
+        height: 100% !important;
+      }
+    }
   }
 
   .create-hint {
