@@ -513,6 +513,7 @@ const getSpecificDateMeetingsInfo = (date: string) => {
 const meetings = ref([])
 
 onMounted(() => {
+  createMode.value = false;
   meetings.value = fakeMeetings;
 })
 
