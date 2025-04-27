@@ -162,11 +162,6 @@ const agendaItemForm = ref<any>({
   endTime: '',
 })
 
-
-
-
-
-
 const selectDate = (val: CalendarDateType) => {
   if (!calendar.value) return
   calendar.value.selectDate(val)

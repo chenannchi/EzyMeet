@@ -23,17 +23,17 @@
         <el-form-item label="標籤" label-position="top">
           <el-input v-model="meeting.label" placeholder="請輸入標籤" :readonly="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="開始日期" label-position="top">
-          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :readonly="mode === 'read'" />
+        <el-form-item label="開始日期" label-position="top" :rules="[{ validator: validateStartDate, trigger: 'change' }]">
+          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate" />
         </el-form-item>
         <el-form-item label="開始時間" label-position="top">
-          <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" :readonly="mode === 'read'" />
+          <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" />
         </el-form-item>
-        <el-form-item label="結束日期" label-position="top">
-          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :readonly="mode === 'read'" />
+        <el-form-item label="結束日期" label-position="top" :rules="[{ validator: validateEndDate, trigger: 'change' }]">
+          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled-date="disabledDate" />
         </el-form-item>
         <el-form-item label="結束時間" label-position="top">
-          <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" :readonly="mode === 'read'" />
+          <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" />
         </el-form-item>
         <el-form-item label="地點" label-position="top">
           <el-input v-model="meeting.location" placeholder="請輸入地點" :readonly="mode === 'read'" />
@@ -303,6 +303,12 @@ const fetchSingleMeeting = async () => {
   }
 };
 
+const disabledDate = (time: Date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to the start of today
+  return time.getTime() < today.getTime();
+}
+
 const validateEndTime = (rule: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇結束時間'));
@@ -310,6 +316,7 @@ const validateEndTime = (rule: any, value: string, callback: Function) => {
     return callback(new Error('結束時間必須晚於開始時間'));
   }
   callback();
+  agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
 };
 
 const validateStartTime = (rule: any, value: string, callback: Function) => {
@@ -319,6 +326,7 @@ const validateStartTime = (rule: any, value: string, callback: Function) => {
     return callback(new Error('開始時間必須早於結束時間'));
   }
   callback();
+  agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
 };
 
 const fakeTableData = ref([
@@ -330,7 +338,25 @@ const attendees = ref<string[]>(['John Doe', 'Jane Smith']);
 const absentees = ref<string[]>(['Alice Johnson', 'Bob Brown']);
 const noResponses = ref<string[]>(['Charlie Davis', 'Dana White']);
 
-onMounted( () => {
+const validateStartDate = (rule: any, value: string, callback: Function) => {
+  if (!value) {
+    return callback(new Error('請選擇開始日期'));
+  } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
+    return callback(new Error('開始日期必須早於結束日期'));
+  }
+  callback();
+};
+
+const validateEndDate = (rule: any, value: string, callback: Function) => {
+  if (!value) {
+    return callback(new Error('請選擇結束日期'));
+  } else if (meeting.value.startDate && new Date(value) < new Date(meeting.value.startDate)) {
+    return callback(new Error('結束日期必須晚於開始日期'));
+  }
+  callback();
+};
+
+onMounted(() => {
   fetchSingleMeeting(id);
   tableData.value = fakeTableData.value.map((item) => {
     return {
