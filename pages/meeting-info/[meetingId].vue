@@ -107,7 +107,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button type="info" @click="handleAddAgendaItem">
+      <el-button type="primary" @click="handleAddAgendaItem">
         完成新增項目
       </el-button>
     </template>
@@ -118,6 +118,10 @@
 import { ref } from 'vue';
 import { Plus, DeleteFilled, Edit } from '@element-plus/icons-vue';
 import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const id = route.params.meetingId as string;
 
 useHead({
   title: '會議資訊'

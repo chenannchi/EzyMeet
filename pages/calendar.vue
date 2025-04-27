@@ -14,14 +14,7 @@
           {{ data.day.split('-')[2] }}
         </p>
         <p class="meeting-count flex gap-1 items-center flex-wrap">
-          <!-- <el-icon v-for="i in data.meetingCount" :key="i" class="meeting-icon">
-            <UserFilled />
-          </el-icon> -->
-
-          <!-- <p v-if="getMeetingCount(data.day) > 0" class="meeting-count"> -->
-          <!-- {{ getMeetingCount(data.day) }}  -->
-          <!-- <el-icon v-for="i in getMeetingCount(data.day)"><UserFilled /></el-icon> -->
-        <div v-for="meeting in getSpecificDateMeetingsInfo(data.day)" class="text-sm truncate px-1 border rounded-md"
+        <div v-for="meeting in getSpecificDateMeetingsInfo(data.day)" class="text-sm truncate px-1 border rounded-md" :key="meeting.id" @click="handleClickMeeting(meeting.id)"
           style=" background-color: #9c2e61; color: white; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
           {{ meeting.title }}
         </div>
@@ -96,7 +89,11 @@
           <el-input v-model="meeting.description" type="textarea" placeholder="請輸入其他資訊" />
         </el-form-item>
       </el-form>
-      <el-button type="primary" @click="handleCreateMeeting" class="!w-full">完成新增會議</el-button>
+      <div class="flex justify-between items-center gap-2">
+        <el-button type="primary" @click="handleCreateMeeting" class="!w-full">完成新增會議</el-button>
+        <el-button type="info" @click="handleCancelCreatingMeeting" class="!w-full">取消新增會議</el-button>
+      </div>
+    
     </div>
     <div v-else class="create-hint">
       <img src="/logo/ezymeet_logo.png" alt="logo" />
@@ -117,7 +114,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button type="info" @click="handleAddAgendaItem">
+        <el-button type="primary" @click="handleAddAgendaItem">
           <!-- <el-button type="info" @click="console.log('add agenda item')"> -->
 
           完成新增項目
@@ -129,11 +126,13 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
+import {useRouter} from 'vue-router'
 import type { CalendarDateType, CalendarInstance } from 'element-plus'
 import { Plus, DeleteFilled, Edit, UserFilled } from '@element-plus/icons-vue';
 const calendar = ref<CalendarInstance>()
 const createMode = ref(true)
 
+const router = useRouter()
 
 useHead({
   title: '行事曆'
@@ -363,6 +362,13 @@ const validateEndDate = (rule: any, value: string, callback: Function) => {
   callback();
 };
 
+const handleClickMeeting = (meetingId: number) => {
+  console.log('click meeting', meetingId)
+  router.push({
+    path: `/meeting-info/${meetingId}`
+  })
+}
+
 const invitees = ref()
 
 
@@ -379,8 +385,26 @@ const disabledDate = (time: Date) => {
   return time.getTime() < today.getTime();
 }
 
+const handleCancelCreatingMeeting = () => {
+  createMode.value = false
+  meeting.value = {
+    title: '',
+    label: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    location: '',
+    link: '',
+    invitees: [],
+    agendaItems: [],
+    description: '',
+  }
+}
+
 const fakeMeetings = [
   {
+    id: '1',
     title: 'Team Sync',
     label: 'Work',
     timeslot: { startDate: '2025-04-01T09:00:00Z', endDate: '2025-04-01T10:00:00Z' },
@@ -393,6 +417,7 @@ const fakeMeetings = [
     description: 'Weekly team sync-up meeting.',
   },
   {
+    id: '2',
     title: 'Project Kickoff',
     label: 'Work',
     timeslot: { startDate: '2025-04-01T11:00:00Z', endDate: '2025-04-01T12:00:00Z' },
@@ -405,6 +430,7 @@ const fakeMeetings = [
     description: 'Kickoff meeting for the new project.',
   },
   {
+    id: '3',
     title: 'Design Review',
     label: 'Work',
     timeslot: { startDate: '2025-04-03T10:00:00Z', endDate: '2025-04-03T11:00:00Z' },
@@ -417,6 +443,7 @@ const fakeMeetings = [
     description: 'Review of the latest design updates.',
   },
   {
+    id: '4',
     title: 'Client Presentation',
     label: 'Work',
     timeslot: { startDate: '2025-04-02T13:00:00Z', endDate: '2025-04-02T14:00:00Z' },
@@ -429,6 +456,7 @@ const fakeMeetings = [
     description: 'Presentation for the client on project progress.',
   },
   {
+    id: '5',
     title: 'Team Retrospective',
     label: 'Work',
     timeslot: { startDate: '2025-04-02T15:00:00Z', endDate: '2025-04-02T16:00:00Z' },
@@ -441,6 +469,7 @@ const fakeMeetings = [
     description: 'Team retrospective to discuss what went well and areas for improvement.',
   },
   {
+    id: '6',
     title: 'Brainstorming Session',
     label: 'Work',
     timeslot: { startDate: '2025-04-02T17:00:00Z', endDate: '2025-04-02T18:00:00Z' },
