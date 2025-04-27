@@ -529,8 +529,6 @@ const fetchAllMeetingsByUserId = async () => {
       host: meeting.host,
     }));
 
-    console.log('after meetings', meetings.value)
-
     if (!response.ok) {
       throw new Error('Failed to fetch meetings');
     }

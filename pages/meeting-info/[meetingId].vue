@@ -21,7 +21,7 @@
           <el-input v-model="meeting.title" placeholder="請輸入標題" :disabled="mode === 'read'" />
         </el-form-item>
         <el-form-item label="標籤" label-position="top">
-          <el-input v-model="meeting.tag" placeholder="請輸入標籤" :disabled="mode === 'read'" />
+          <el-input v-model="meeting.label" placeholder="請輸入標籤" :disabled="mode === 'read'" />
         </el-form-item>
         <el-form-item label="開始日期" label-position="top">
           <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled="mode === 'read'" />
@@ -154,7 +154,7 @@ const handleCloseDeleteMeetingDialog = () => {
 
 const meeting = ref<any>({
   title: '',
-  tag: '',
+  label: '',
   startDate: '',
   startTime: '',
   endDate: '',
@@ -272,7 +272,7 @@ async function handleDeleteMeeting() {
         message: `成功刪除${responseData.title}會議!`,
         type: 'success',
       })
-      router.push({path:'/calendar'})
+      router.push({ path: '/calendar' })
       // Handle success, e.g., redirect to another page or show a success message
     } else {
       ElMessage.error(`會議刪除失敗`)
@@ -298,7 +298,7 @@ const cancelEdit = () => {
   // Reset the form to the original meeting data
   meeting.value = {
     title: '',
-    tag: '',
+    label: '',
     startDate: '',
     startTime: '',
     endDate: '',
@@ -313,20 +313,51 @@ const cancelEdit = () => {
   };
 };
 
-const fetchSingleMeeting = async (id: string) => {
+const fetchSingleMeeting = async () => {
   try {
-    // const meetingData = await getSingleMeeting(id);
-    // meeting.value = meetingData;
-    console.log('獲取會議資訊', id);
+    const response = await fetch(`http://localhost:8080/meetings/meeting/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const responseData = await response.json();
+
+    console.log('會議資訊', responseData);
+    console.log('meeting', responseData.meeting);
+
+    if (response.status === 200) {
+      meeting.value = {
+        title: responseData.meeting.title,
+        label: responseData.meeting.label,
+        startDate: responseData.meeting.timeslot.startDate.split('T')[0],
+        startTime: responseData.meeting.timeslot.startDate.split('T')[1].split('+')[0],
+        endDate: responseData.meeting.timeslot.endDate.split('T')[0],
+        endTime: responseData.meeting.timeslot.endDate.split('T')[1].split('+')[0],
+        location: responseData.meeting.location,
+        link: responseData.meeting.link,
+        attendees: responseData.accepted,
+        absentees: responseData.declined,
+        noResponse: responseData.invited,
+        agendaItems: responseData.meeting.agendaItems,
+        otherInfo: responseData.meeting.otherInfo,
+      };
+
+      console.log('會議資訊獲取成功', meeting.value);
+    } else {
+      console.error('會議資訊獲取失敗', responseData);
+    }
   } catch (error) {
-    console.error('獲取會議資訊失敗', error);
+    console.error('會議資訊請求失敗', error);
   }
 };
 
 
 
-onMounted(() => {
-  fetchSingleMeeting(id);
+
+onMounted(async () => {
+  await fetchSingleMeeting(id);
   tableData.value = fakeTableData.value.map((item) => {
     return {
       title: item.title,
