@@ -253,6 +253,9 @@ const validateStartTime = (rule: any, value: string, callback: Function) => {
 };
 
 async function handleDeleteMeeting() {
+  /**
+   * TODO: meetId 要更換成真實的 meetId 
+   * */
   try {
     const response = await fetch(`http://localhost:8080/meetings/delete/${"TMpNeQfNW3jvLjNDaFlW"}`, {
       method: 'DELETE',
