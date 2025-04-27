@@ -294,8 +294,20 @@ const cancelEdit = () => {
   };
 };
 
+const fetchSingleMeeting = async (id: string) => {
+  try {
+    // const meetingData = await getSingleMeeting(id);
+    // meeting.value = meetingData;
+    console.log('獲取會議資訊', id);
+  } catch (error) {
+    console.error('獲取會議資訊失敗', error);
+  }
+};
+
+
 
 onMounted(() => {
+  fetchSingleMeeting(id);
   tableData.value = fakeTableData.value.map((item) => {
     return {
       title: item.title,
