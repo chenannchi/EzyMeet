@@ -60,11 +60,11 @@
           <template #label>
             <div class="flex justify-between items-center">
               <div>議程項目</div>
-              <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog"
-                :readonly="mode === 'read'"></el-button>
+              <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog('add')"
+                v-if="mode === 'edit'"></el-button>
             </div>
           </template>
-          <el-table :data="tableData" style="width: 100%">
+          <el-table :data="agendaItemsData" style="width: 100%">
             <el-table-column prop="title" label="標題" />
             <el-table-column label="時間">
               <template #default="{ row }">
@@ -74,7 +74,7 @@
             <el-table-column label="操作" width="60px" v-if="mode === 'edit'">
               <template #default="{ row }">
                 <div class="flex justify-center items-center gap-1">
-                  <el-icon @click="handleEditAgendaItem(row)" class="!m-0 !p-0 !w-auto !fill-blue-500"
+                  <el-icon @click="openEditAgendaItem(row)" class="!m-0 !p-0 !w-auto !fill-blue-500"
                     >
                     <Edit class="!text-blue-500" />
                   </el-icon>
@@ -116,8 +116,11 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button type="primary" @click="handleAddAgendaItem">
+      <el-button v-if="agendaCreateMode" type="primary" @click="handleAddAgendaItem">
         完成新增項目
+      </el-button>
+      <el-button v-else type="primary" @click="handleEditAgendaItem">
+        完成編輯項目
       </el-button>
     </template>
   </el-dialog>
@@ -135,7 +138,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Plus, DeleteFilled, Edit } from '@element-plus/icons-vue';
-import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
+// Removed unused imports
 import { useRoute } from 'vue-router';
 
 useHead({
@@ -148,9 +151,10 @@ const router = useRouter();
 const id = route.params.meetingId as string;
 
 const agendaItemFormRef = ref<any>(null)
-const tableData = ref<any[]>([]);
+const agendaItemsData = ref<any[]>([]);
 const deleteMeetingDialog = ref(false)
 const agendaItemDialog = ref(false)
+const agendaCreateMode = ref(true)
 
 const meeting = ref<any>({
   title: '',
@@ -174,7 +178,8 @@ const agendaItemForm = ref<any>({
   endTime: '',
 })
 
-const handleOpenItemDialog = () => {
+const handleOpenItemDialog = (mode:string) => {
+  agendaCreateMode.value = mode === 'add'
   agendaItemDialog.value = true
 }
 
@@ -192,23 +197,52 @@ const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
     if (valid) {
       console.log('add agenda item');
-      tableData.value.push(agendaItemForm.value);
+      console.log('agendaItemForm', agendaItemForm.value);
+      agendaItemsData.value.push({ ...agendaItemForm.value });
+      console.log('agendaItemsData', agendaItemsData.value);
       agendaItemDialog.value = false;
+      agendaItemForm.value = {
+        title: '',
+        startTime: '',
+        endTime: '',
+      };
+      agendaItemFormRef.value.resetFields(); // Reset the validation status
     } else {
       console.log('Validation failed');
     }
   });
 };
 
-const handleEditAgendaItem = (row: any) => {
-  agendaItemForm.value = row
-  agendaItemDialog.value = true
+const openEditAgendaItem = (row: any) => {
+  agendaItemForm.value = { ...row };
+  handleOpenItemDialog('edit');
+  // agendaItemDialog.value = true
+}
+const handleEditAgendaItem = () => {
+  agendaItemFormRef.value.validate((valid: boolean) => {
+    if (valid) {
+      const index = agendaItemsData.value.findIndex((item) => item.id === agendaItemForm.value.id);
+      if (index !== -1) {
+        agendaItemsData.value[index] = { ...agendaItemForm.value };
+      }
+      agendaItemDialog.value = false;
+      agendaItemForm.value = {
+        title: '',
+        startTime: '',
+        endTime: '',
+      };
+      agendaItemFormRef.value.resetFields(); // Reset the validation status
+    } else {
+      console.log('Validation failed');
+    }
+  });
+  
 }
 
 const handleDeleteAgendaItem = (row: any) => {
-  const index = tableData.value.indexOf(row)
+  const index = agendaItemsData.value.indexOf(row)
   if (index > -1) {
-    tableData.value.splice(index, 1)
+    agendaItemsData.value.splice(index, 1)
   }
 }
 
@@ -310,7 +344,7 @@ const disabledDate = (time: Date) => {
   return time.getTime() < today.getTime();
 }
 
-const validateEndTime = (rule: any, value: string, callback: Function) => {
+const validateEndTime = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇結束時間'));
   } else if (agendaItemForm.value.startTime && value <= agendaItemForm.value.startTime) {
@@ -320,7 +354,7 @@ const validateEndTime = (rule: any, value: string, callback: Function) => {
   agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
 };
 
-const validateStartTime = (rule: any, value: string, callback: Function) => {
+const validateStartTime = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇開始時間'));
   } else if (agendaItemForm.value.endTime && value >= agendaItemForm.value.endTime) {
@@ -339,7 +373,7 @@ const attendees = ref<string[]>(['John Doe', 'Jane Smith']);
 const absentees = ref<string[]>(['Alice Johnson', 'Bob Brown']);
 const noResponses = ref<string[]>(['Charlie Davis', 'Dana White']);
 
-const validateStartDate = (rule: any, value: string, callback: Function) => {
+const validateStartDate = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇開始日期'));
   } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
@@ -348,7 +382,7 @@ const validateStartDate = (rule: any, value: string, callback: Function) => {
   callback();
 };
 
-const validateEndDate = (rule: any, value: string, callback: Function) => {
+const validateEndDate = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇結束日期'));
   } else if (meeting.value.startDate && new Date(value) < new Date(meeting.value.startDate)) {
@@ -359,8 +393,9 @@ const validateEndDate = (rule: any, value: string, callback: Function) => {
 
 onMounted(() => {
   fetchSingleMeeting(id);
-  tableData.value = fakeTableData.value.map((item) => {
+  agendaItemsData.value = fakeTableData.value.map((item) => {
     return {
+      id: item.id,
       title: item.title,
       startTime: item.startTime,
       endTime: item.endTime,
