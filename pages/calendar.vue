@@ -14,7 +14,8 @@
           {{ data.day.split('-')[2] }}
         </p>
         <p class="meeting-count flex gap-1 items-center flex-wrap">
-        <div v-for="meeting in getSpecificDateMeetingsInfo(data.day)" class="text-sm truncate px-1 border rounded-md" :key="meeting.id" @click="handleClickMeeting(meeting.id)"
+        <div v-for="meeting in getSpecificDateMeetingsInfo(data.day)" class="text-sm truncate px-1 border rounded-md"
+          :key="meeting.id" @click="handleClickMeeting(meeting.id)"
           style=" background-color: #9c2e61; color: white; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
           {{ meeting.title }}
         </div>
@@ -57,10 +58,10 @@
           <template #label>
             <div class="flex justify-between items-center">
               <div>議程項目</div>
-              <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog"></el-button>
+              <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog('add')"></el-button>
             </div>
           </template>
-          <el-table :data="tableData" style="width: 100%">
+          <el-table :data="agendaItemsData" style="width: 100%">
             <el-table-column prop="title" label="標題" />
             <el-table-column label="時間">
               <template #default="{ row }">
@@ -70,7 +71,7 @@
             <el-table-column label="操作" width="60px">
               <template #default="{ row }">
                 <div class="flex justify-center items-center gap-1">
-                  <el-button type="text" @click="handleEditAgendaItem(row)" class="!m-0 !p-0 !w-auto">
+                  <el-button type="text" @click="openEditAgendaItem(row)" class="!m-0 !p-0 !w-auto">
                     <el-icon>
                       <Edit />
                     </el-icon>
@@ -93,7 +94,7 @@
         <el-button type="info" @click="handleCancelCreatingMeeting" class="!w-full">取消新增會議</el-button>
         <el-button type="primary" @click="handleCreateMeeting" class="!w-full">完成新增會議</el-button>
       </div>
-    
+
     </div>
     <div v-else class="create-hint">
       <img src="/logo/ezymeet_logo.png" alt="logo" />
@@ -114,10 +115,11 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button type="primary" @click="handleAddAgendaItem">
-          <!-- <el-button type="info" @click="console.log('add agenda item')"> -->
-
+        <el-button v-if="agendaCreateMode" type="primary" @click="handleAddAgendaItem">
           完成新增項目
+        </el-button>
+        <el-button v-else type="primary" @click="handleEditAgendaItem">
+          完成編輯項目
         </el-button>
       </template>
     </el-dialog>
@@ -126,7 +128,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import {useRouter} from 'vue-router'
+import { useRouter } from 'vue-router'
 import type { CalendarDateType, CalendarInstance } from 'element-plus'
 import { Plus, DeleteFilled, Edit, UserFilled } from '@element-plus/icons-vue';
 
@@ -141,6 +143,7 @@ useHead({
 const createMode = ref(true)
 const agendaItemDialog = ref(false)
 const agendaItemFormRef = ref<any>(null)
+const agendaCreateMode = ref(true)
 
 const meeting = ref<any>({
   title: '',
@@ -167,7 +170,8 @@ const selectDate = (val: CalendarDateType) => {
   calendar.value.selectDate(val)
 }
 
-const handleOpenItemDialog = () => {
+const handleOpenItemDialog = (mode: string) => {
+  agendaCreateMode.value = mode === 'add'
   agendaItemDialog.value = true
 }
 
@@ -185,29 +189,52 @@ const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
     if (valid) {
       console.log('add agenda item');
-      tableData.value.push(agendaItemForm.value);
+      console.log('agendaItemForm', agendaItemForm.value);
+      agendaItemsData.value.push({ ...agendaItemForm.value });
+      console.log('agendaItemsData', agendaItemsData.value);
       agendaItemDialog.value = false;
-      agendaItemFormRef.value.resetFields();
+      agendaItemForm.value = {
+        title: '',
+        startTime: '',
+        endTime: '',
+      };
+      agendaItemFormRef.value.resetFields(); // Reset the validation status
     } else {
-      agendaItemFormRef.value.resetFields('startTime');
-      agendaItemFormRef.value.resetFields('endTime');
-
       console.log('Validation failed');
     }
   });
 };
 
-const handleEditAgendaItem = (row: any) => {
-  console.log('edit agenda item', row)
-  agendaItemForm.value = row
-  agendaItemDialog.value = true
+const openEditAgendaItem = (row: any) => {
+  agendaItemForm.value = { ...row };
+  handleOpenItemDialog('edit');
+  // agendaItemDialog.value = true
+}
+const handleEditAgendaItem = () => {
+  agendaItemFormRef.value.validate((valid: boolean) => {
+    if (valid) {
+      const index = agendaItemsData.value.findIndex((item) => item.id === agendaItemForm.value.id);
+      if (index !== -1) {
+        agendaItemsData.value[index] = { ...agendaItemForm.value };
+      }
+      agendaItemDialog.value = false;
+      agendaItemForm.value = {
+        title: '',
+        startTime: '',
+        endTime: '',
+      };
+      agendaItemFormRef.value.resetFields(); // Reset the validation status
+    } else {
+      console.log('Validation failed');
+    }
+  });
+
 }
 
 const handleDeleteAgendaItem = (row: any) => {
-  console.log('delete agenda item', row)
-  const index = tableData.value.indexOf(row)
+  const index = agendaItemsData.value.indexOf(row)
   if (index > -1) {
-    tableData.value.splice(index, 1)
+    agendaItemsData.value.splice(index, 1)
   }
 }
 
@@ -233,6 +260,7 @@ async function handleCreateMeeting() {
 
     const data = await response.json();
     console.log('API response:', data);
+
 
     resetMeetingForm();
   } catch (error) {
@@ -275,14 +303,14 @@ function generateTimestamps() {
   };
 }
 
-function createRequestBody(startTimeStamp:any, endTimeStamp:any) {
+function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
   return {
     title: meeting.value.title,
     label: meeting.value.label,
     timeslot: { startDate: startTimeStamp, endDate: endTimeStamp },
     location: meeting.value.location,
     link: meeting.value.link,
-    invitees: meeting.value.invitees.map((userId:any)=> ({
+    invitees: meeting.value.invitees.map((userId: any) => ({
       id: '',
       meetingId: '',
       userId: String(userId),
@@ -294,6 +322,7 @@ function createRequestBody(startTimeStamp:any, endTimeStamp:any) {
 
 function resetMeetingForm() {
   createMode.value = false;
+  agendaItemsData.value = [];
   meeting.value = {
     title: '',
     label: '',
@@ -316,11 +345,11 @@ const fakeTableData = ref([
   { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
 ]);
 
-const tableData = ref<any[]>([]);
+const agendaItemsData = ref<any[]>([]);
 
 
 
-const validateEndTime = (rule: any, value: string, callback: Function) => {
+const validateEndTime = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇結束時間'));
   } else if (agendaItemForm.value.startTime && value <= agendaItemForm.value.startTime) {
@@ -330,7 +359,7 @@ const validateEndTime = (rule: any, value: string, callback: Function) => {
   agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
 };
 
-const validateStartTime = (rule: any, value: string, callback: Function) => {
+const validateStartTime = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇開始時間'));
   } else if (agendaItemForm.value.endTime && value >= agendaItemForm.value.endTime) {
@@ -340,7 +369,7 @@ const validateStartTime = (rule: any, value: string, callback: Function) => {
   agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
 };
 
-const validateStartDate = (rule: any, value: string, callback: Function) => {
+const validateStartDate = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇開始日期'));
   } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
@@ -349,7 +378,7 @@ const validateStartDate = (rule: any, value: string, callback: Function) => {
   callback();
 };
 
-const validateEndDate = (rule: any, value: string, callback: Function) => {
+const validateEndDate = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇結束日期'));
   } else if (meeting.value.startDate && new Date(value) < new Date(meeting.value.startDate)) {
@@ -400,7 +429,7 @@ const handleCancelCreatingMeeting = () => {
 const getSpecificDateMeetingsInfo = (date: string) => {
   const cellDate = new Date(date);
   cellDate.setHours(0, 0, 0, 0);
-  const meetingsOnDate = meetings.value.filter((meeting:any) => {
+  const meetingsOnDate = meetings.value.filter((meeting: any) => {
     const startDate = new Date(meeting.startDate);
     const endDate = new Date(meeting.endDate);
     startDate.setHours(0, 0, 0, 0);
@@ -417,7 +446,7 @@ const meetings = ref([])
 /**
  * TODO: userId要更換成真實的
  */
-const fetchAllMeetingsByUserId = async (userId:string) => {
+const fetchAllMeetingsByUserId = async (userId: string) => {
   try {
     const response = await fetch(`http://localhost:8080/meetings/user/${'user-123'}`, {
       method: 'GET',
@@ -466,7 +495,7 @@ onMounted(async () => {
     userName: user.userName,
     email: user.email,
   }));
-  tableData.value = fakeTableData.value.map((item) => ({
+  agendaItemsData.value = fakeTableData.value.map((item) => ({
     id: item.id,
     title: item.title,
     startTime: item.startTime,
@@ -500,7 +529,7 @@ onMounted(async () => {
 
       }
 
-      .el-calendar-day{
+      .el-calendar-day {
         height: 100% !important;
       }
     }

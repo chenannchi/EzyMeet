@@ -6,7 +6,7 @@
       <el-button v-if="mode === 'read'" type="primary" class="mr-auto !w-[120px]" @click="mode = 'edit'">
         編輯
       </el-button>
-      <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="mode = 'read';">
+      <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="handleSaveMeeting">
         儲存
       </el-button>
       <el-button v-if="mode === 'edit'" type="info" class="mr-auto !w-[120px]" @click="cancelEdit">
@@ -150,7 +150,8 @@ const route = useRoute();
 const router = useRouter();
 const id = route.params.meetingId as string;
 
-const agendaItemFormRef = ref<any>(null)
+const agendaItemFormRef = ref<any>(null);
+const meetingFormRef = ref<any>(null);
 const agendaItemsData = ref<any[]>([]);
 const deleteMeetingDialog = ref(false)
 const agendaItemDialog = ref(false)
@@ -191,6 +192,19 @@ const handleCloseAgendaItemDialog = () => {
   }
 
   agendaItemDialog.value = false
+}
+
+const handleSaveMeeting = () => {
+  meetingFormRef.value.validate((valid: boolean) => {
+    if (valid) {
+      console.log('meeting', meeting.value); 
+    }
+    else {
+      console.log('Validation failed');
+    }
+  });
+
+  mode.value = 'read';
 }
 
 const handleAddAgendaItem = () => {
