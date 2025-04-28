@@ -6,7 +6,7 @@
       <el-button v-if="mode === 'read'" type="primary" class="mr-auto !w-[120px]" @click="mode = 'edit'">
         編輯
       </el-button>
-      <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="mode.value = 'read';">
+      <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="mode = 'read';">
         儲存
       </el-button>
       <el-button v-if="mode === 'edit'" type="info" class="mr-auto !w-[120px]" @click="cancelEdit">
@@ -75,10 +75,10 @@
               <template #default="{ row }">
                 <div class="flex justify-center items-center gap-1">
                   <el-icon @click="handleEditAgendaItem(row)" class="!m-0 !p-0 !w-auto !fill-blue-500"
-                    :readonly="mode === 'read'">
+                    >
                     <Edit class="!text-blue-500" />
                   </el-icon>
-                  <el-icon @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto" :readonly="mode === 'read'">
+                  <el-icon @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto">
                     <DeleteFilled class="!text-red-500" />
                   </el-icon>
                 </div>
@@ -144,6 +144,7 @@ useHead({
 
 const mode = ref<'read' | 'edit'>('read');
 const route = useRoute();
+const router = useRouter();
 const id = route.params.meetingId as string;
 
 const agendaItemFormRef = ref<any>(null)
@@ -268,7 +269,7 @@ const handleDeleteMeeting = async () => {
 /**
  * TODO: 抓取確切的人的email，並顯示在select裡
  */
-const fetchSingleMeeting = async () => {
+const fetchSingleMeeting = async (meetingId:string) => {
   try {
     const response = await fetch(`http://localhost:8080/meetings/meeting/${id}`, {
       method: 'GET',

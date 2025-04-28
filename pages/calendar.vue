@@ -275,14 +275,14 @@ function generateTimestamps() {
   };
 }
 
-function createRequestBody(startTimeStamp, endTimeStamp) {
+function createRequestBody(startTimeStamp:any, endTimeStamp:any) {
   return {
     title: meeting.value.title,
     label: meeting.value.label,
     timeslot: { startDate: startTimeStamp, endDate: endTimeStamp },
     location: meeting.value.location,
     link: meeting.value.link,
-    invitees: meeting.value.invitees.map(userId => ({
+    invitees: meeting.value.invitees.map((userId:any)=> ({
       id: '',
       meetingId: '',
       userId: String(userId),
@@ -358,7 +358,7 @@ const validateEndDate = (rule: any, value: string, callback: Function) => {
   callback();
 };
 
-const handleClickMeeting = (meetingId: number) => {
+const handleClickMeeting = (meetingId: string) => {
   router.push({
     path: `/meeting-info/${meetingId}`
   })
@@ -397,91 +397,10 @@ const handleCancelCreatingMeeting = () => {
   }
 }
 
-// const fakeMeetings = [
-//   {
-//     id: '1',
-//     title: 'Team Sync',
-//     label: 'Work',
-//     timeslot: { startDate: '2025-04-01T09:00:00Z', endDate: '2025-04-01T10:00:00Z' },
-//     location: 'Conference Room A',
-//     link: 'https://example.com/meeting1',
-//     invitees: [
-//       { id: '1', meetingId: '1', userId: '1', status: 'INVITED' },
-//       { id: '2', meetingId: '1', userId: '2', status: 'INVITED' },
-//     ],
-//     description: 'Weekly team sync-up meeting.',
-//   },
-//   {
-//     id: '2',
-//     title: 'Project Kickoff',
-//     label: 'Work',
-//     timeslot: { startDate: '2025-04-01T11:00:00Z', endDate: '2025-04-01T12:00:00Z' },
-//     location: 'Conference Room B',
-//     link: 'https://example.com/meeting2',
-//     invitees: [
-//       { id: '3', meetingId: '2', userId: '3', status: 'INVITED' },
-//       { id: '4', meetingId: '2', userId: '4', status: 'INVITED' },
-//     ],
-//     description: 'Kickoff meeting for the new project.',
-//   },
-//   {
-//     id: '3',
-//     title: 'Design Review',
-//     label: 'Work',
-//     timeslot: { startDate: '2025-04-03T10:00:00Z', endDate: '2025-04-03T11:00:00Z' },
-//     location: 'Conference Room C',
-//     link: 'https://example.com/meeting3',
-//     invitees: [
-//       { id: '1', meetingId: '3', userId: '1', status: 'INVITED' },
-//       { id: '2', meetingId: '3', userId: '2', status: 'INVITED' },
-//     ],
-//     description: 'Review of the latest design updates.',
-//   },
-//   {
-//     id: '4',
-//     title: 'Client Presentation',
-//     label: 'Work',
-//     timeslot: { startDate: '2025-04-02T13:00:00Z', endDate: '2025-04-02T14:00:00Z' },
-//     location: 'Conference Room D',
-//     link: 'https://example.com/meeting4',
-//     invitees: [
-//       { id: '3', meetingId: '4', userId: '3', status: 'INVITED' },
-//       { id: '4', meetingId: '4', userId: '4', status: 'INVITED' },
-//     ],
-//     description: 'Presentation for the client on project progress.',
-//   },
-//   {
-//     id: '5',
-//     title: 'Team Retrospective',
-//     label: 'Work',
-//     timeslot: { startDate: '2025-04-02T15:00:00Z', endDate: '2025-04-02T16:00:00Z' },
-//     location: 'Conference Room E',
-//     link: 'https://example.com/meeting5',
-//     invitees: [
-//       { id: '1', meetingId: '5', userId: '1', status: 'INVITED' },
-//       { id: '2', meetingId: '5', userId: '2', status: 'INVITED' },
-//     ],
-//     description: 'Team retrospective to discuss what went well and areas for improvement.',
-//   },
-//   {
-//     id: '6',
-//     title: 'Brainstorming Session',
-//     label: 'Work',
-//     timeslot: { startDate: '2025-04-02T17:00:00Z', endDate: '2025-04-02T18:00:00Z' },
-//     location: 'Conference Room F',
-//     link: 'https://example.com/meeting6',
-//     invitees: [
-//       { id: '3', meetingId: '6', userId: '3', status: 'INVITED' },
-//       { id: '4', meetingId: '6', userId: '4', status: 'INVITED' },
-//     ],
-//     description: 'Brainstorming session for new ideas and strategies.',
-//   },
-// ]
-
 const getSpecificDateMeetingsInfo = (date: string) => {
   const cellDate = new Date(date);
   cellDate.setHours(0, 0, 0, 0);
-  const meetingsOnDate = meetings.value.filter(meeting => {
+  const meetingsOnDate = meetings.value.filter((meeting:any) => {
     const startDate = new Date(meeting.startDate);
     const endDate = new Date(meeting.endDate);
     startDate.setHours(0, 0, 0, 0);
@@ -489,13 +408,16 @@ const getSpecificDateMeetingsInfo = (date: string) => {
     return cellDate >= startDate && cellDate <= endDate;
   });
   return meetingsOnDate.length > 0
-    ? meetingsOnDate.map(meeting => ({ id: meeting.id, title: meeting.title }))
+    ? meetingsOnDate.map((meeting: { id: string; title: string }) => ({ id: meeting.id, title: meeting.title }))
     : [];
 };
 
 const meetings = ref([])
 
-const fetchAllMeetingsByUserId = async () => {
+/**
+ * TODO: userId要更換成真實的
+ */
+const fetchAllMeetingsByUserId = async (userId:string) => {
   try {
     const response = await fetch(`http://localhost:8080/meetings/user/${'user-123'}`, {
       method: 'GET',
@@ -538,6 +460,18 @@ onMounted(async () => {
   await fetchAllMeetingsByUserId("user-123");
   createMode.value = false;
   // meetings.value = fakeMeetings;
+  invitees.value = fakeUsers.map((user) => ({
+    id: user.id,
+    googleId: user.googleId,
+    userName: user.userName,
+    email: user.email,
+  }));
+  tableData.value = fakeTableData.value.map((item) => ({
+    id: item.id,
+    title: item.title,
+    startTime: item.startTime,
+    endTime: item.endTime,
+  }));
 })
 
 
