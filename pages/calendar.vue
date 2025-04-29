@@ -128,7 +128,7 @@ import { useRouter } from 'vue-router'
 import type { CalendarDateType, CalendarInstance } from 'element-plus'
 import { Plus, DeleteFilled, Edit, UserFilled } from '@element-plus/icons-vue';
 
-const userId = JSON.parse(localStorage.getItem('user') || '{}').id
+const userId = ref('')
 
 const { user, isLoading, login, logout, getIdToken } = useAuth()
 const router = useRouter()
@@ -499,7 +499,9 @@ const handleGetParticipantsOptions = async () => {
 
 
 onMounted(async () => {
-  await fetchAllMeetingsByUserId(userId);
+  const user = localStorage.getItem('user');
+  userId.value = user ? JSON.parse(user).id : '';
+  await fetchAllMeetingsByUserId(userId.value);
   await handleGetParticipantsOptions();
   createMode.value = false;
   
