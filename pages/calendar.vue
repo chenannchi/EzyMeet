@@ -441,12 +441,9 @@ const getSpecificDateMeetingsInfo = (date: string) => {
 
 const meetings = ref([])
 
-/**
- * TODO: userId要更換成真實的
- */
 const fetchAllMeetingsByUserId = async (userId: string) => {
   try {
-    const response = await fetch(`http://localhost:8080/meetings/user/${'user-123'}`, {
+    const response = await fetch(`http://localhost:8080/meetings/user/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -506,10 +503,7 @@ const handleGetParticipantsOptions = async () => {
 
 
 onMounted(async () => {
-  /**
-   * TODO: userId要更換成真實的
-   */
-  await fetchAllMeetingsByUserId("user-123");
+  await fetchAllMeetingsByUserId(userId);
   await handleGetParticipantsOptions();
   createMode.value = false;
   
