@@ -98,13 +98,13 @@
             </el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="其他資訊" label-position="top" class="otherInfo !w-full">
-          <el-input v-model="meeting.otherInfo" type="textarea" placeholder="請輸入其他資訊" :disabled="mode === 'read'" />
+        <el-form-item label="其他資訊" label-position="top" class="description !w-full">
+          <el-input v-model="meeting.description" type="textarea" placeholder="請輸入其他資訊" :disabled="mode === 'read'" />
         </el-form-item>
       </div>
       <div>
-        <el-form-item label="會議記錄" label-position="top" class="meetingNotes">
-          <el-input v-model="meeting.meetingNotes" type="textarea" placeholder="請輸入會議記錄" :rows="25"
+        <el-form-item label="會議記錄" label-position="top" class="meetingNote">
+          <el-input v-model="meeting.meetingNote" type="textarea" placeholder="請輸入會議記錄" :rows="25"
             :disabled="mode === 'read'" />
         </el-form-item>
         <el-form-item label="留言" label-position="top" class="comments">
@@ -190,7 +190,7 @@ const meeting = ref<any>({
   absentees: [],
   noResponses: [],
   agendaItems: [],
-  otherInfo: '',
+  description: '',
   meetingNote: '',
 });
 
@@ -443,7 +443,7 @@ const fetchSingleMeeting = async () => {
         absentees: responseData.declinedParticipants.map((participant: any) => participant.userId),
         noResponses:  responseData.invitedParticipants.map((participant: any) => participant.userId),
         agendaItems: responseData.agendaItems,
-        otherInfo: responseData.otherInfo,
+        description: responseData.description,
       };
       participantsData.value = {
         invitedParticipants: responseData.invitedParticipants,
