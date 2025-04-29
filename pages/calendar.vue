@@ -248,21 +248,29 @@ async function handleCreateMeeting() {
     const { startTimeStamp, endTimeStamp } = generateTimestamps();
     const requestBody = createRequestBody(startTimeStamp, endTimeStamp);
 
+    console.log('Request Body:', requestBody);
     console.log('Request Body:', JSON.stringify(requestBody));
 
-    const response = await fetch('http://localhost:8080/meetings/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    // const response = await fetch('http://localhost:8080/meetings/create', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(requestBody),
+    // });
 
-    if (!response.ok) throw new Error('Failed to create meeting');
+    // if (response.status === 409) {
+    //   ElMessage({
+    //     message: '會議時間衝突，請重新選擇',
+    //     type: 'warning',
+    //   })
+    //   return;
+    // }
 
-    const data = await response.json();
-    console.log('API response:', data);
+    // if (!response.ok) throw new Error('Failed to create meeting');
 
+    // const data = await response.json();
+    // console.log('API response:', data);
 
-    resetMeetingForm();
+    // resetMeetingForm();
   } catch (error) {
     console.error('Error creating meeting:', error);
   }
@@ -308,6 +316,7 @@ function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
     title: meeting.value.title,
     label: meeting.value.label,
     timeslot: { startDate: startTimeStamp, endDate: endTimeStamp },
+    // host: user.id,
     location: meeting.value.location,
     link: meeting.value.link,
     invitees: meeting.value.invitees.map((userId: any) => ({
@@ -491,7 +500,7 @@ const handleGetParticipantsOptions = async () => {
     });
 
     const responseData = await response.json();
-    console.log('responseData', responseData);
+    // console.log('responseData', responseData);
     participantOptions.value = responseData.map((user: any) => ({
       id: user.id,
       displayName: user.displayName,
