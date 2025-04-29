@@ -71,16 +71,12 @@
             <el-table-column label="操作" width="60px">
               <template #default="{ row }">
                 <div class="flex justify-center items-center gap-1">
-                  <el-button type="text" @click="openEditAgendaItem(row)" class="!m-0 !p-0 !w-auto">
-                    <el-icon>
-                      <Edit />
-                    </el-icon>
-                  </el-button>
-                  <el-button type="text" @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto">
-                    <el-icon>
-                      <DeleteFilled />
-                    </el-icon>
-                  </el-button>
+                  <el-icon @click="openEditAgendaItem(row)" class="!m-0 !p-0 !w-auto !fill-blue-500">
+                    <Edit class="!text-blue-500" />
+                  </el-icon>
+                  <el-icon @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto">
+                    <DeleteFilled class="!text-red-500" />
+                  </el-icon>
                 </div>
               </template>
             </el-table-column>
@@ -132,7 +128,7 @@ import { useRouter } from 'vue-router'
 import type { CalendarDateType, CalendarInstance } from 'element-plus'
 import { Plus, DeleteFilled, Edit, UserFilled } from '@element-plus/icons-vue';
 
-const userId = JSON.parse(localStorage.getItem('user') || '{}').id
+const userId = ref('')
 
 const { user, isLoading, login, logout, getIdToken } = useAuth()
 const router = useRouter()
@@ -267,7 +263,7 @@ async function handleCreateMeeting() {
     if (!response.ok) throw new Error('Failed to create meeting');
 
     const data = await response.json();
-
+    fetchAllMeetingsByUserId(userId.value);
     resetMeetingForm();
   } catch (error) {
     console.error('Error creating meeting:', error);
@@ -314,7 +310,7 @@ function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
     title: meeting.value.title,
     label: meeting.value.label,
     timeslot: { startDate: startTimeStamp, endDate: endTimeStamp },
-    host: userId,
+    host: userId.value,
     location: meeting.value.location,
     link: meeting.value.link,
     participants: meeting.value.invitees.map((userId: any) => ({
@@ -343,16 +339,12 @@ function resetMeetingForm() {
   };
 }
 
-
-
 const fakeTableData = ref([
   { id: 1, title: '會議議程1', startTime: '09:00', endTime: '10:00' },
   { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
 ]);
 
 const agendaItemsData = ref<any[]>([]);
-
-
 
 const validateEndTime = (_: any, value: string, callback: Function) => {
   if (!value) {
@@ -400,10 +392,9 @@ const handleClickMeeting = (meetingId: string) => {
 
 const participantOptions = ref()
 
-
 const disabledDate = (time: Date) => {
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset time to the start of today
+  today.setHours(0, 0, 0, 0);
   return time.getTime() < today.getTime();
 }
 
@@ -501,13 +492,12 @@ const handleGetParticipantsOptions = async () => {
   }
 }
 
-
 onMounted(async () => {
-  await fetchAllMeetingsByUserId(userId);
+  const user = localStorage.getItem('user');
+  userId.value = user ? JSON.parse(user).id : '';
+  await fetchAllMeetingsByUserId(userId.value);
   await handleGetParticipantsOptions();
   createMode.value = false;
-  
-
   agendaItemsData.value = fakeTableData.value.map((item) => ({
     id: item.id,
     title: item.title,
