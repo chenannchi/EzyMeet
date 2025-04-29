@@ -132,6 +132,8 @@ import { useRouter } from 'vue-router'
 import type { CalendarDateType, CalendarInstance } from 'element-plus'
 import { Plus, DeleteFilled, Edit, UserFilled } from '@element-plus/icons-vue';
 
+const userId = JSON.parse(localStorage.getItem('user') || '{}').id
+
 const { user, isLoading, login, logout, getIdToken } = useAuth()
 const router = useRouter()
 const calendar = ref<CalendarInstance>()
@@ -143,6 +145,7 @@ useHead({
 const createMode = ref(true)
 const agendaItemDialog = ref(false)
 const agendaItemFormRef = ref<any>(null)
+const meetingFormRef = ref<any>(null)
 const agendaCreateMode = ref(true)
 
 const meeting = ref<any>({
@@ -251,26 +254,28 @@ async function handleCreateMeeting() {
     console.log('Request Body:', requestBody);
     console.log('Request Body:', JSON.stringify(requestBody));
 
-    // const response = await fetch('http://localhost:8080/meetings/create', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(requestBody),
-    // });
+    const response = await fetch('http://localhost:8080/meetings/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
 
-    // if (response.status === 409) {
-    //   ElMessage({
-    //     message: '會議時間衝突，請重新選擇',
-    //     type: 'warning',
-    //   })
-    //   return;
-    // }
+    if (response.status === 409) {
+      ElMessage({
+        message: '會議時間衝突，請重新選擇',
+        type: 'warning',
+      })
+      meetingFormRef.value.resetFields('startDate')
+      meetingFormRef.value.resetFields('endDate')
+      return;
+    }
 
-    // if (!response.ok) throw new Error('Failed to create meeting');
+    if (!response.ok) throw new Error('Failed to create meeting');
 
-    // const data = await response.json();
-    // console.log('API response:', data);
+    const data = await response.json();
+    console.log('API response:', data);
 
-    // resetMeetingForm();
+    resetMeetingForm();
   } catch (error) {
     console.error('Error creating meeting:', error);
   }
@@ -288,7 +293,7 @@ function validateMeetingDates() {
 }
 
 function validateMeetingTimes() {
-  if (meeting.value.startTime > meeting.value.endTime) {
+  if (meeting.value.startTime >= meeting.value.endTime) {
     alert('結束時間必須大於開始時間');
     return false;
   }
@@ -316,12 +321,10 @@ function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
     title: meeting.value.title,
     label: meeting.value.label,
     timeslot: { startDate: startTimeStamp, endDate: endTimeStamp },
-    // host: user.id,
+    host: userId,
     location: meeting.value.location,
     link: meeting.value.link,
-    invitees: meeting.value.invitees.map((userId: any) => ({
-      id: '',
-      meetingId: '',
+    participants: meeting.value.invitees.map((userId: any) => ({
       userId: String(userId),
       status: 'INVITED',
     })),
@@ -404,13 +407,6 @@ const handleClickMeeting = (meetingId: string) => {
 
 const participantOptions = ref()
 
-
-const fakeUsers = [
-  { id: '1', googleId: 'google1', userName: 'User One', email: 'userone@example.com' },
-  { id: '2', googleId: 'google2', userName: 'User Two', email: 'usertwo@example.com' },
-  { id: '3', googleId: 'google3', userName: 'User Three', email: 'userthree@example.com' },
-  { id: '4', googleId: 'google4', userName: 'User Four', email: 'userfour@example.com' }
-]
 
 const disabledDate = (time: Date) => {
   const today = new Date();
@@ -525,12 +521,7 @@ onMounted(async () => {
   await handleGetParticipantsOptions();
   createMode.value = false;
   
-  // participantOptions.value = fakeUsers.map((user) => ({
-  //   id: user.id,
-  //   googleId: user.googleId,
-  //   userName: user.userName,
-  //   email: user.email,
-  // }));
+
   agendaItemsData.value = fakeTableData.value.map((item) => ({
     id: item.id,
     title: item.title,
