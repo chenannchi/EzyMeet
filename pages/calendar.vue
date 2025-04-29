@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <el-calendar ref="calendar" v-if="meetings.length">
+    <el-calendar ref="calendar">
       <template #header="{ date }">
         <el-button size="small" @click="selectDate('prev-month')" class="!w-auto">
           < </el-button>
@@ -71,16 +71,12 @@
             <el-table-column label="操作" width="60px">
               <template #default="{ row }">
                 <div class="flex justify-center items-center gap-1">
-                  <el-button type="text" @click="openEditAgendaItem(row)" class="!m-0 !p-0 !w-auto">
-                    <el-icon>
-                      <Edit />
-                    </el-icon>
-                  </el-button>
-                  <el-button type="text" @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto">
-                    <el-icon>
-                      <DeleteFilled />
-                    </el-icon>
-                  </el-button>
+                  <el-icon @click="openEditAgendaItem(row)" class="!m-0 !p-0 !w-auto !fill-blue-500">
+                    <Edit class="!text-blue-500" />
+                  </el-icon>
+                  <el-icon @click="handleDeleteAgendaItem(row)" class="!m-0 !p-0 !w-auto">
+                    <DeleteFilled class="!text-red-500" />
+                  </el-icon>
                 </div>
               </template>
             </el-table-column>
