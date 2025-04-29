@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center w-full">
       <div class="text-2xl font-bold w-full">會議資訊</div>
       <el-button type="default" @click="$router.push('/calendar')" class="!w-[120px]">返回日曆</el-button>
-      <el-button v-if="mode === 'read'" type="primary" class="mr-auto !w-[120px]" @click="mode = 'edit'">
+      <el-button v-if="mode === 'read'" type="primary" class="mr-auto !w-[120px]" @click="handleEdit">
         編輯
       </el-button>
       <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="handleSaveMeeting">
@@ -278,21 +278,7 @@ const handleCloseDeleteMeetingDialog = () => {
 
 const cancelEdit = () => {
   mode.value = 'read';
-  meeting.value = {
-    title: '',
-    label: '',
-    startDate: '',
-    startTime: '',
-    endDate: '',
-    endTime: '',
-    location: '',
-    link: '',
-    attendees: [],
-    absentees: [],
-    noResponses: [],
-    agendaItems: [],
-    otherInfo: '',
-  };
+  meeting.value = originalMeeting.value ? { ...originalMeeting.value } : {}; // Reset to original meeting data
 };
 
 const handleDeleteMeeting = async () => {
@@ -325,6 +311,13 @@ const handleDeleteMeeting = async () => {
 
 }
 
+const originalMeeting = ref({});
+
+const handleEdit = () => {
+  mode.value = 'edit';
+  originalMeeting.value = { ...meeting.value };  // Clear validation when switching to edit mode
+};
+
 const fetchSingleMeeting = async () => {
   try {
     const response = await fetch(`http://localhost:8080/meetings/meeting/${id}`, {
@@ -339,14 +332,15 @@ const fetchSingleMeeting = async () => {
     console.log('responseData', responseData);
     if (response.status === 200) {
       const responseStartDate = responseData.timeslot.startDate
-      const reponseEndDate = responseData.timeslot.endDate
-      meeting.value = {
+      const responseEndDate = responseData.timeslot.endDate
+      meeting.value =
+      {
         title: responseData.title,
         label: responseData.label,
         startDate: new Date(responseStartDate),
         startTime: new Date(responseData.timeslot.startDate).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-        endDate: new Date(responseData.timeslot.endDate),
-        endTime: new Date(responseData.timeslot.endDate).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+        endDate: new Date(responseEndDate),
+        endTime: new Date(responseEndDate).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
         location: responseData.location,
         link: responseData.link,
         attendees: responseData.acceptedParticipants,
@@ -355,6 +349,7 @@ const fetchSingleMeeting = async () => {
         agendaItems: responseData.agendaItems,
         otherInfo: responseData.otherInfo,
       };
+
     } else {
       console.error('會議資訊獲取失敗', responseData);
     }
