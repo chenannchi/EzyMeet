@@ -51,22 +51,22 @@
         <el-form-item label="出席者" label-position="top" class="attendees !w-full">
           <el-select v-model="meeting.attendees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
             placeholder="" :disabled="mode === 'read'" suffix-icon="">
-            <el-option v-for="attendee in meeting.attendees" :key="attendee.userId"
+            <el-option v-for="attendee in participantsData.acceptedParticipants" :key="attendee.userId"
               :label="attendee.name + ' <' + attendee.email + '>'" :value="attendee.userId" />
           </el-select>
         </el-form-item>
         <el-form-item label="不出席者" label-position="top" class="absentees !w-full">
           <el-select v-model="meeting.absentees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
             placeholder="" :disabled="mode === 'read'" suffix-icon="">
-            <el-option v-for="absentee in meeting.absentees" :key="absentee.userId"
+            <el-option v-for="absentee in participantsData.declinedParticipants" :key="absentee.userId"
               :label="absentee.name + ' <' + absentee.email + '>'" :value="absentee.userId" />
           </el-select>
         </el-form-item>
         <el-form-item label="尚未回覆者" label-position="top" class="noResponses !w-full">
           <el-select v-model="meeting.noResponses" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
             placeholder="" :disabled="mode === 'read'" suffix-icon="">
-            <el-option v-for="noResponse in meeting.noResponses" :key="noResponse.userId"
-              :label="noResponse.name + ' <' + noResponse.email + '>'" :value="noResponse.userId" />
+            <el-option v-for="participant in participantsData.invitedParticipants" :key="participant.userId"
+              :label="participant.name + ' <' + participant.email + '>'" :value="participant.userId" />
           </el-select>
         </el-form-item>
         <el-form-item label-position="top" class="agendaItems !w-full">
@@ -77,7 +77,7 @@
                 v-if="mode === 'edit'"></el-button>
             </div>
           </template>
-          <el-table :data="agendaItemsData" style="width: 100%">
+          <el-table :data="agendaItemsData" style="width: 100%" empty-text="目前尚無議程">
             <el-table-column prop="title" label="標題" />
             <el-table-column label="時間">
               <template #default="{ row }">
@@ -152,6 +152,7 @@ import { ref } from 'vue';
 import { Plus, DeleteFilled, Edit } from '@element-plus/icons-vue';
 // Removed unused imports
 import { useRoute } from 'vue-router';
+import type { invalidateTypeCache } from 'vue/compiler-sfc';
 
 useHead({
   title: '會議資訊'
@@ -168,6 +169,13 @@ const agendaItemsData = ref<any[]>([]);
 const deleteMeetingDialog = ref(false)
 const agendaItemDialog = ref(false)
 const agendaCreateMode = ref(true)
+
+const participantsData = ref<any>({
+  invitedParticipants: [],
+  aceeptedParticipants: [],
+  declinedParticipants: [],
+
+});
 
 const meeting = ref<any>({
   title: '',
@@ -344,12 +352,19 @@ const fetchSingleMeeting = async () => {
         endTime: new Date(responseEndDate).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
         location: responseData.location,
         link: responseData.link,
-        attendees: responseData.acceptedParticipants,
-        absentees: responseData.declinedParticipants,
-        noResponses: responseData.invitedParticipants,
+        attendees: responseData.acceptedParticipants.map((participant: any) => participant.userId),
+        absentees: responseData.declinedParticipants.map((participant: any) => participant.userId),
+        noResponses:  responseData.invitedParticipants.map((participant: any) => participant.userId),
         agendaItems: responseData.agendaItems,
         otherInfo: responseData.otherInfo,
       };
+      participantsData.value = {
+        invitedParticipants: responseData.invitedParticipants,
+        acceptedParticipants: responseData.acceptedParticipants,
+        declinedParticipants: responseData.declinedParticipants,
+      };
+      
+      
 
     } else {
       console.error('會議資訊獲取失敗', responseData);

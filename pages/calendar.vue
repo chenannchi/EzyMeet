@@ -61,7 +61,7 @@
               <el-button :icon="Plus" class="!w-auto !m-0" circle @click="handleOpenItemDialog('add')"></el-button>
             </div>
           </template>
-          <el-table :data="agendaItemsData" style="width: 100%">
+          <el-table :data="agendaItemsData" style="width: 100%" empty-text="目前尚無議程">
             <el-table-column prop="title" label="標題" />
             <el-table-column label="時間">
               <template #default="{ row }">
