@@ -51,7 +51,7 @@
         </el-form-item>
         <el-form-item label="受邀者" label-position="top" class="invitees">
           <el-select v-model="meeting.invitees" multiple placeholder="請選擇受邀者">
-            <el-option v-for="invitee in participantOptions" :key="invitee.id" :label="invitee.displayName+' <'+invitee.email+'>'" :value="invitee.id" />
+            <el-option v-for="participantOption in participantOptions" :key="participantOption.id" :label="participantOption.displayName+' <'+participantOption.email+'>'" :value="participantOption.id" />
           </el-select>
         </el-form-item>
         <el-form-item label-position="top" class="agendaItems !w-full">
