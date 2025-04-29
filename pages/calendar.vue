@@ -504,8 +504,6 @@ onMounted(async () => {
   await fetchAllMeetingsByUserId(userId.value);
   await handleGetParticipantsOptions();
   createMode.value = false;
-  
-
   agendaItemsData.value = fakeTableData.value.map((item) => ({
     id: item.id,
     title: item.title,
