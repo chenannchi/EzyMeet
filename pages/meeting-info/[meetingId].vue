@@ -385,9 +385,9 @@ const validateStartTime = (_: any, value: string, callback: Function) => {
   agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
 };
 
-const fakeTableData = ref([
-  { id: 1, title: '會議議程1', startTime: '09:00', endTime: '10:00' },
-  { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
+const fakeTableData = ref<{ id: number; title: string; startTime: string; endTime: string }[]>([
+  // { id: 1, title: '會議議程1', startTime: '09:00', endTime: '10:00' },
+  // { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
 ]);
 
 const validateStartDate = (_: any, value: string, callback: Function) => {
