@@ -51,7 +51,7 @@
         </el-form-item>
         <el-form-item label="受邀者" label-position="top" class="invitees">
           <el-select v-model="meeting.invitees" multiple placeholder="請選擇受邀者">
-            <el-option v-for="invitee in invitees" :key="invitee.id" :label="invitee.email" :value="invitee.id" />
+            <el-option v-for="invitee in participantOptions" :key="invitee.id" :label="invitee.displayName+' <'+invitee.email+'>'" :value="invitee.id" />
           </el-select>
         </el-form-item>
         <el-form-item label-position="top" class="agendaItems !w-full">
@@ -393,7 +393,7 @@ const handleClickMeeting = (meetingId: string) => {
   })
 }
 
-const invitees = ref()
+const participantOptions = ref()
 
 
 const fakeUsers = [
@@ -481,20 +481,47 @@ const fetchAllMeetingsByUserId = async (userId: string) => {
   }
 }
 
+const handleGetParticipantsOptions = async () => {
+  try {
+    const response = await fetch('http://localhost:8080/user/participant-options', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const responseData = await response.json();
+    console.log('responseData', responseData);
+    participantOptions.value = responseData.map((user: any) => ({
+      id: user.id,
+      displayName: user.displayName,
+      email: user.email,
+    }));
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch users');
+    }
+
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+}
+
 
 onMounted(async () => {
   /**
    * TODO: userId要更換成真實的
    */
   await fetchAllMeetingsByUserId("user-123");
+  await handleGetParticipantsOptions();
   createMode.value = false;
-  // meetings.value = fakeMeetings;
-  invitees.value = fakeUsers.map((user) => ({
-    id: user.id,
-    googleId: user.googleId,
-    userName: user.userName,
-    email: user.email,
-  }));
+  
+  // participantOptions.value = fakeUsers.map((user) => ({
+  //   id: user.id,
+  //   googleId: user.googleId,
+  //   userName: user.userName,
+  //   email: user.email,
+  // }));
   agendaItemsData.value = fakeTableData.value.map((item) => ({
     id: item.id,
     title: item.title,
@@ -502,8 +529,6 @@ onMounted(async () => {
     endTime: item.endTime,
   }));
 })
-
-
 </script>
 <style scoped lang="scss">
 .page-container {

@@ -41,6 +41,11 @@
         <el-form-item label="連結" label-position="top">
           <el-input v-model="meeting.link" placeholder="請輸入連結" :readonly="mode === 'read'" />
         </el-form-item>
+        <!-- <el-form-item label="新增受邀者" label-position="top" class="invitees !w-full">
+          <el-select v-model="meeting.invitees" multiple placeholder="請選擇受邀者">
+            <el-option v-for="invitee in invitees" :key="invitee.id" :label="invitee.email" :value="invitee.id" />
+          </el-select>
+        </el-form-item> -->
         <el-form-item label="出席者" label-position="top" class="attendees !w-full">
           <el-select v-model="meeting.attendees" multiple placeholder="請選擇出席者" :disabled="mode === 'read'">
             <el-option v-for="attendee in attendees" :key="attendee" :label="attendee" :value="attendee" />
