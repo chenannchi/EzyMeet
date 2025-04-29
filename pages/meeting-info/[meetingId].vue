@@ -302,14 +302,15 @@ const handleDeleteMeeting = async () => {
       },
     });
 
-    const responseData = await response.json();
+    const responseData = await response.text();
 
     if (response.status === 200) {
+
       ElMessage({
-        message: `成功刪除${responseData.title}會議!`,
+        message: `成功刪除${responseData}會議!`,
         type: 'success',
       })
-      router.push({ path: '/calendar' })
+      await router.push({ path: '/calendar' });
     } else {
       ElMessage.error(`會議刪除失敗`)
     }

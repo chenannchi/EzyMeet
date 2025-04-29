@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <el-calendar ref="calendar" v-if="meetings.length">
+    <el-calendar ref="calendar">
       <template #header="{ date }">
         <el-button size="small" @click="selectDate('prev-month')" class="!w-auto">
           < </el-button>
