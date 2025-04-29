@@ -191,10 +191,7 @@ const handleCloseAgendaItemDialog = () => {
 const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
     if (valid) {
-      console.log('add agenda item');
-      console.log('agendaItemForm', agendaItemForm.value);
       agendaItemsData.value.push({ ...agendaItemForm.value });
-      console.log('agendaItemsData', agendaItemsData.value);
       agendaItemDialog.value = false;
       agendaItemForm.value = {
         title: '',
@@ -251,9 +248,6 @@ async function handleCreateMeeting() {
     const { startTimeStamp, endTimeStamp } = generateTimestamps();
     const requestBody = createRequestBody(startTimeStamp, endTimeStamp);
 
-    console.log('Request Body:', requestBody);
-    console.log('Request Body:', JSON.stringify(requestBody));
-
     const response = await fetch('http://localhost:8080/meetings/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -273,7 +267,6 @@ async function handleCreateMeeting() {
     if (!response.ok) throw new Error('Failed to create meeting');
 
     const data = await response.json();
-    console.log('API response:', data);
 
     resetMeetingForm();
   } catch (error) {
@@ -496,7 +489,6 @@ const handleGetParticipantsOptions = async () => {
     });
 
     const responseData = await response.json();
-    // console.log('responseData', responseData);
     participantOptions.value = responseData.map((user: any) => ({
       id: user.id,
       displayName: user.displayName,
