@@ -156,7 +156,7 @@ import { useRoute } from 'vue-router';
 useHead({
   title: '會議資訊'
 });
-
+const userId = ref('')
 const mode = ref<'read' | 'edit'>('read');
 const route = useRoute();
 const router = useRouter();
@@ -183,6 +183,7 @@ const meeting = ref<any>({
   noResponses: [],
   agendaItems: [],
   otherInfo: '',
+  meetingNote: '',
 });
 
 const agendaItemForm = ref<any>({
@@ -206,18 +207,104 @@ const handleCloseAgendaItemDialog = () => {
   agendaItemDialog.value = false
 }
 
-const handleSaveMeeting = () => {
-  meetingFormRef.value.validate((valid: boolean) => {
+function handleSaveMeeting() {
+  meetingFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
-      console.log('meeting', meeting.value);
-    }
-    else {
+      try {
+        console.log('meeting', meeting.value);
+        const { startTimeStamp, endTimeStamp } = generateTimestamps();
+        const requestBody = createRequestBody(startTimeStamp, endTimeStamp);
+
+        const response = await fetch(`http://localhost:8080/meetings/update/${id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (response.status === 409) {
+          ElMessage({
+            message: '會議時間衝突，請重新選擇',
+            type: 'warning',
+          });
+          return;
+        }
+
+        if (response.status === 200) {
+          ElMessage({
+            message: '會議更新成功!',
+            type: 'success',
+          });
+          
+          originalMeeting.value = { ...meeting.value };
+          
+          mode.value = 'read';
+          
+          await fetchSingleMeeting();
+        } else {
+          ElMessage.error('會議更新失敗');
+        }
+      } catch (error) {
+        console.error('會議更新請求失敗', error);
+        ElMessage.error('會議更新請求失敗');
+      }
+    } else {
       console.log('Validation failed');
+      ElMessage.warning('請完成必填欄位');
     }
   });
-
-  mode.value = 'read';
 }
+
+function generateTimestamps() {
+  const startDate = new Date(meeting.value.startDate);
+  const endDate = new Date(meeting.value.endDate);
+
+  const [startHours, startMinutes] = meeting.value.startTime.split(':').map(Number);
+  const [endHours, endMinutes] = meeting.value.endTime.split(':').map(Number);
+
+  startDate.setHours(startHours, startMinutes, 0, 0);
+  endDate.setHours(endHours, endMinutes, 0, 0);
+
+  return {
+    startTimeStamp: startDate.toISOString(),
+    endTimeStamp: endDate.toISOString(),
+  };
+}
+
+
+function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
+  const allParticipants = [
+    ...(meeting.value.attendees || []).map((user: any) => ({
+      userId: typeof user === 'string' ? user : user.userId,
+      status: 'ACCEPTED'
+    })),
+    ...(meeting.value.absentees || []).map((user: any) => ({
+      userId: typeof user === 'string' ? user : user.userId,
+      status: 'DECLINED'
+    })),
+    ...(meeting.value.noResponses || []).map((user: any) => ({
+      userId: typeof user === 'string' ? user : user.userId, 
+      status: 'INVITED'
+    }))
+  ];
+
+
+  return {
+    title: meeting.value.title,
+    label: meeting.value.label,
+    timeslot: { startDate: startTimeStamp, endDate: endTimeStamp },
+    host: userId.value,
+    location: meeting.value.location,
+    link: meeting.value.link,
+    participants: allParticipants,
+    description: meeting.value.description || '',
+    meetingRecord: meeting.value.meetingNote || '',
+  };
+}
+
+
+
 
 const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
@@ -409,6 +496,8 @@ const validateEndDate = (_: any, value: string, callback: Function) => {
 };
 
 onMounted(async () => {
+  const user = localStorage.getItem('user');
+  userId.value = user ? JSON.parse(user).id : '';
   await fetchSingleMeeting();
   agendaItemsData.value = fakeTableData.value.map((item) => {
     return {
