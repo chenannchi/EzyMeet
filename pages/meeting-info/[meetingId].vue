@@ -248,8 +248,6 @@ function handleSaveMeeting() {
           originalMeeting.value = { ...meeting.value };
           
           mode.value = 'read';
-          
-          await fetchSingleMeeting();
         } else {
           ElMessage.error('會議更新失敗');
         }
