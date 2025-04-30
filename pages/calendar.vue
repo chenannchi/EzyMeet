@@ -99,11 +99,11 @@
 
     <el-dialog v-model="agendaItemDialog" :before-close="handleCloseAgendaItemDialog">
       <!-- <div class="title"></div> -->
-      <el-form ref="agendaItemFormRef" style="" :model="agendaItemForm" label-width="auto" status-icon>
+      <el-form ref="agendaItemFormRef" style="" :model="agendaItemForm" label-width="auto" status-icon :rules="agendaRules">
         <el-form-item label="標題" prop="title">
           <el-input v-model="agendaItemForm.title" placeholder="請輸入標題" />
         </el-form-item>
-        <el-form-item label="開始時間" prop="startTime" >
+        <el-form-item label="開始時間" prop="startTime">
           <el-time-select v-model="agendaItemForm.startTime" placeholder="請選擇開始時間" step="00:15" />
         </el-form-item>
         <el-form-item label="結束時間" prop="endTime">
@@ -186,6 +186,7 @@ const handleCloseAgendaItemDialog = () => {
 
 const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
+    console.log('valid', valid)
     if (valid) {
       agendaItemsData.value.push({ ...agendaItemForm.value });
       agendaItemDialog.value = false;
@@ -349,6 +350,24 @@ const fakeTableData = ref<{ id: number; title: string; startTime: string; endTim
 
 const agendaItemsData = ref<any[]>([]);
 
+const validateAgendaStartTime = (_: any, value: string, callback: Function) => {
+  if (!value) {
+    return callback(new Error('請選擇時間'));
+  } else if (agendaItemForm.value.endTime && agendaItemForm.value.startTime >= agendaItemForm.value.endTime) {
+    return callback(new Error('結束時間必須晚於開始時間'));
+  }
+  callback();
+};
+
+const validateAgendaEndTime = (_: any, value: string, callback: Function) => {
+  if (!value) {
+    return callback(new Error('請選擇時間'));
+  } else if (agendaItemForm.value.startTime && agendaItemForm.value.startTime >= agendaItemForm.value.endTime) {
+    return callback(new Error('結束時間必須晚於開始時間'));
+  }
+  callback();
+};
+
 const validateEndTime = (_: any, value: string, callback: Function) => {
   // console.log('validateEndTime', value, agendaItemForm.value.startTime)
   if (!value) {
@@ -437,6 +456,13 @@ const rules = reactive<FormRules<RuleForm>>({
   startTime: [{ required: true, validator: validateStartTime, trigger: 'change' }],
   endTime: [{ required: true, validator: validateEndTime, trigger: 'change' }],
 })
+
+const agendaRules = reactive<FormRules<any>>({
+  title: [{ required: true, message: '請輸入標題', trigger: 'change' }],
+  startTime: [{ required: true, validator: validateAgendaStartTime, trigger: 'change' }],
+  endTime: [{ required: true, validator: validateAgendaEndTime, trigger: 'change' }],
+})
+
 
 
 const handleClickMeeting = (meetingId: string) => {
