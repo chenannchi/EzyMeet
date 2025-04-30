@@ -24,23 +24,23 @@
     </el-calendar>
     <div v-if="createMode" class="create-meeting">
 
-      <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form">
-        <el-form-item label="標題" label-position="top">
+      <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form" :rules="rules">
+        <el-form-item label="標題" label-position="top" prop="title">
           <el-input v-model="meeting.title" placeholder="請輸入標題" />
         </el-form-item>
         <el-form-item label="標籤" label-position="top">
           <el-input v-model="meeting.label" placeholder="請輸入標籤" />
         </el-form-item>
-        <el-form-item label="開始日期" label-position="top" :rules="[{ validator: validateStartDate, trigger: 'change' }]">
-          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate" />
+        <el-form-item label="開始日期" label-position="top" prop="startDate">
+          <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate"/>
         </el-form-item>
-        <el-form-item label="開始時間" label-position="top">
+        <el-form-item label="開始時間" label-position="top" prop="startTime">
           <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" />
         </el-form-item>
-        <el-form-item label="結束日期" label-position="top" :rules="[{ validator: validateEndDate, trigger: 'change' }]">
-          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled-date="disabledDate" />
+        <el-form-item label="結束日期" label-position="top" prop="endDate">
+          <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled-date="disabledDate"/>
         </el-form-item>
-        <el-form-item label="結束時間" label-position="top">
+        <el-form-item label="結束時間" label-position="top" prop="endTime">
           <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" />
         </el-form-item>
         <el-form-item label="地點" label-position="top">
@@ -103,10 +103,10 @@
         <el-form-item label="標題" prop="title">
           <el-input v-model="agendaItemForm.title" placeholder="請輸入標題" />
         </el-form-item>
-        <el-form-item label="開始時間" prop="startTime" :rules="[{ validator: validateStartTime, trigger: 'change' }]">
+        <el-form-item label="開始時間" prop="startTime" >
           <el-time-select v-model="agendaItemForm.startTime" placeholder="請選擇開始時間" step="00:15" />
         </el-form-item>
-        <el-form-item label="結束時間" prop="endTime" :rules="[{ validator: validateEndTime, trigger: 'change' }]">
+        <el-form-item label="結束時間" prop="endTime">
           <el-time-select v-model="agendaItemForm.endTime" placeholder="請選擇結束時間" step="00:15" />
         </el-form-item>
       </el-form>
@@ -125,7 +125,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import type { CalendarDateType, CalendarInstance } from 'element-plus'
+import type { CalendarDateType, CalendarInstance, FormRules } from 'element-plus'
 import { Plus, DeleteFilled, Edit, UserFilled } from '@element-plus/icons-vue';
 
 const userId = ref('')
@@ -144,7 +144,7 @@ const agendaItemFormRef = ref<any>(null)
 const meetingFormRef = ref<any>(null)
 const agendaCreateMode = ref(true)
 
-const meeting = ref<any>({
+const meeting = ref<RuleForm>({
   title: '',
   label: '',
   startDate: '',
@@ -234,60 +234,63 @@ const handleDeleteAgendaItem = (row: any) => {
   }
 }
 
-/**
- * TODO: userId需加入到host attr
- */
 async function handleCreateMeeting() {
-  try {
-    if (!validateMeetingDates() || !validateMeetingTimes()) return;
+  if (!meetingFormRef.value) return;
+  meetingFormRef.value.validate(async (valid: boolean) => {
+    console.log('valid', valid)
+    if (!valid) return; // Only proceed if the form is valid
 
-    const { startTimeStamp, endTimeStamp } = generateTimestamps();
-    const requestBody = createRequestBody(startTimeStamp, endTimeStamp);
+    try {
+      const { startTimeStamp, endTimeStamp } = generateTimestamps();
+      const requestBody = createRequestBody(startTimeStamp, endTimeStamp);
 
-    const response = await fetch('http://localhost:8080/meetings/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+      const response = await fetch('http://localhost:8080/meetings/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
 
-    if (response.status === 409) {
-      ElMessage({
-        message: '會議時間衝突，請重新選擇',
-        type: 'warning',
-      })
-      meetingFormRef.value.resetFields('startDate')
-      meetingFormRef.value.resetFields('endDate')
-      return;
+      if (response.status === 409) {
+        ElMessage({
+          message: '會議時間衝突，請重新選擇',
+          type: 'warning',
+        });
+        // meetingFormRef.value.resetFields('startDate');
+        // meetingFormRef.value.resetFields('endDate');
+        meetingFormRef.value.resetFields('startTime');
+        meetingFormRef.value.resetFields('endTime');
+        return;
+      }
+
+      if (!response.ok) throw new Error('Failed to create meeting');
+
+      const data = await response.json();
+      fetchAllMeetingsByUserId(userId.value);
+      resetMeetingForm();
+    } catch (error) {
+      console.error('Error creating meeting:', error);
     }
-
-    if (!response.ok) throw new Error('Failed to create meeting');
-
-    const data = await response.json();
-    fetchAllMeetingsByUserId(userId.value);
-    resetMeetingForm();
-  } catch (error) {
-    console.error('Error creating meeting:', error);
-  }
+  });
 }
 
-function validateMeetingDates() {
-  const startDate = new Date(meeting.value.startDate);
-  const endDate = new Date(meeting.value.endDate);
+// function validateMeetingDates() {
+//   const startDate = new Date(meeting.value.startDate);
+//   const endDate = new Date(meeting.value.endDate);
 
-  if (startDate > endDate) {
-    alert('結束日期必須大於開始日期');
-    return false;
-  }
-  return true;
-}
+//   if (startDate > endDate) {
+//     alert('結束日期必須大於開始日期');
+//     return false;
+//   }
+//   return true;
+// }
 
-function validateMeetingTimes() {
-  if (meeting.value.startTime >= meeting.value.endTime) {
-    alert('結束時間必須大於開始時間');
-    return false;
-  }
-  return true;
-}
+// function validateMeetingTimes() {
+//   if (meeting.value.startTime >= meeting.value.endTime) {
+//     alert('結束時間必須大於開始時間');
+//     return false;
+//   }
+//   return true;
+// }
 
 function generateTimestamps() {
   const startDate = new Date(meeting.value.startDate);
@@ -347,26 +350,53 @@ const fakeTableData = ref<{ id: number; title: string; startTime: string; endTim
 const agendaItemsData = ref<any[]>([]);
 
 const validateEndTime = (_: any, value: string, callback: Function) => {
+  // console.log('validateEndTime', value, agendaItemForm.value.startTime)
   if (!value) {
     return callback(new Error('請選擇結束時間'));
-  } else if (agendaItemForm.value.startTime && value <= agendaItemForm.value.startTime) {
+  } else if (
+    meeting.value.startTime &&
+    meeting.value.endTime &&
+    meeting.value.startDate === meeting.value.endDate &&
+    meeting.value.startTime >= meeting.value.endTime
+  ) {
+    console.log
+    return callback(new Error('結束時間必須晚於開始時間'));
+  }
+  else if(
+    meeting.value.startDate &&
+    meeting.value.endDate &&
+    meeting.value.startTime >= meeting.value.endTime
+  ) {
     return callback(new Error('結束時間必須晚於開始時間'));
   }
   callback();
-  agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
+  // agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
 };
 
 const validateStartTime = (_: any, value: string, callback: Function) => {
+  // console.log('validateStartTime', value, agendaItemForm.value.endTime)
   if (!value) {
     return callback(new Error('請選擇開始時間'));
-  } else if (agendaItemForm.value.endTime && value >= agendaItemForm.value.endTime) {
+  } else if (
+    meeting.value.startTime &&
+    meeting.value.endTime &&
+    meeting.value.startDate === meeting.value.endDate &&
+    meeting.value.startTime >= meeting.value.endTime
+  ) {
+    return callback(new Error('開始時間必須早於結束時間'));
+  }else if (
+    meeting.value.startDate &&
+    meeting.value.endDate &&
+    meeting.value.startTime >= meeting.value.endTime
+  ) {
     return callback(new Error('開始時間必須早於結束時間'));
   }
   callback();
-  agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
+  // agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
 };
 
 const validateStartDate = (_: any, value: string, callback: Function) => {
+  // console.log('validateStartDate', value, meeting.value.endDate)
   if (!value) {
     return callback(new Error('請選擇開始日期'));
   } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
@@ -376,6 +406,7 @@ const validateStartDate = (_: any, value: string, callback: Function) => {
 };
 
 const validateEndDate = (_: any, value: string, callback: Function) => {
+  // console.log('validateEndDate', value, meeting.value.startDate)
   if (!value) {
     return callback(new Error('請選擇結束日期'));
   } else if (meeting.value.startDate && new Date(value) < new Date(meeting.value.startDate)) {
@@ -383,6 +414,30 @@ const validateEndDate = (_: any, value: string, callback: Function) => {
   }
   callback();
 };
+
+type RuleForm = {
+  title: string;
+  label: string;
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  link: string;
+  invitees: string[];
+  agendaItems: string[];
+  description: string;
+  [key: string]: any;
+};
+
+const rules = reactive<FormRules<RuleForm>>({
+  title: [{ required: true, message: '請輸入標題', trigger: 'change' }],
+  startDate: [{ required: true, validator: validateStartDate, trigger: 'change' }],
+  endDate: [{ required: true, validator: validateEndDate, trigger: 'change' }],
+  startTime: [{ required: true, validator: validateStartTime, trigger: 'change' }],
+  endTime: [{ required: true, validator: validateEndTime, trigger: 'change' }],
+})
+
 
 const handleClickMeeting = (meetingId: string) => {
   router.push({
