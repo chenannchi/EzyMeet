@@ -14,27 +14,27 @@
       </el-button>
     </div>
     <el-divider class="!my-2"></el-divider>
-    <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form">
+    <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form" :rules="rules">
       <div>
 
         <el-form-item label="標題" label-position="top">
-          <el-input v-model="meeting.title" placeholder="請輸入標題" :disabled="mode === 'read'" />
+          <el-input v-model="meeting.title" placeholder="請輸入標題" :disabled="mode === 'read'" prop="title" />
         </el-form-item>
         <el-form-item label="標籤" label-position="top">
           <el-input v-model="meeting.label" placeholder="請輸入標籤" :disabled="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="開始日期" label-position="top" :rules="[{ validator: validateStartDate, trigger: 'change' }]">
+        <el-form-item label="開始日期" label-position="top" prop="startDate">
           <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate"
             :disabled="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="開始時間" label-position="top">
+        <el-form-item label="開始時間" label-position="top" prop="startTime">
           <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" :disabled="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="結束日期" label-position="top" :rules="[{ validator: validateEndDate, trigger: 'change' }]">
+        <el-form-item label="結束日期" label-position="top" prop="endDate">
           <el-date-picker v-model="meeting.endDate" type="date" placeholder="請選擇結束日期" :disabled-date="disabledDate"
             :disabled="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="結束時間" label-position="top">
+        <el-form-item label="結束時間" label-position="top" prop="endTime">
           <el-time-select v-model="meeting.endTime" step="00:15" placeholder="請選擇結束時間" :disabled="mode === 'read'" />
         </el-form-item>
         <el-form-item label="地點" label-position="top">
@@ -116,14 +116,15 @@
     <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-[120px]">刪除會議</el-button>
   </div>
   <el-dialog v-model="agendaItemDialog" :before-close="handleCloseAgendaItemDialog">
-    <el-form ref="agendaItemFormRef" style="" :model="agendaItemForm" label-width="auto" status-icon>
+    <el-form ref="agendaItemFormRef" style="" :model="agendaItemForm" label-width="auto" status-icon
+      :rules="agendaRules">
       <el-form-item label="標題" prop="title">
-        <el-input v-model="agendaItemForm.title" placeholder="請輸入標題" />
+        <el-input v-model="agendaItemForm.title" placeholder="請輸入標題" prop="title" />
       </el-form-item>
-      <el-form-item label="開始時間" prop="startTime" :rules="[{ validator: validateStartTime, trigger: 'change' }]">
+      <el-form-item label="開始時間" prop="startTime">
         <el-time-select v-model="agendaItemForm.startTime" placeholder="請選擇開始時間" step="00:15" />
       </el-form-item>
-      <el-form-item label="結束時間" prop="endTime" :rules="[{ validator: validateEndTime, trigger: 'change' }]">
+      <el-form-item label="結束時間" prop="endTime">
         <el-time-select v-model="agendaItemForm.endTime" placeholder="請選擇結束時間" step="00:15" />
       </el-form-item>
     </el-form>
@@ -153,6 +154,7 @@ import { Plus, DeleteFilled, Edit } from '@element-plus/icons-vue';
 // Removed unused imports
 import { useRoute } from 'vue-router';
 import type { invalidateTypeCache } from 'vue/compiler-sfc';
+import type { FormRules } from 'element-plus';
 
 useHead({
   title: '會議資訊'
@@ -177,7 +179,24 @@ const participantsData = ref<any>({
 
 });
 
-const meeting = ref<any>({
+interface RuleForm {
+  title: string;
+  label: string;
+  startDate: string | Date;
+  startTime: string;
+  endDate: string | Date;
+  endTime: string;
+  location: string;
+  link: string;
+  attendees: string[];
+  absentees: string[];
+  noResponses: string[];
+  agendaItems: any[];
+  description: string;
+  meetingNote: string;
+  comments: string; // Added comments property
+}
+const meeting = ref<RuleForm>({
   title: '',
   label: '',
   startDate: '',
@@ -192,6 +211,7 @@ const meeting = ref<any>({
   agendaItems: [],
   description: '',
   meetingNote: '',
+  comments: '', // Initialized comments property
 });
 
 const agendaItemForm = ref<any>({
@@ -216,6 +236,7 @@ const handleCloseAgendaItemDialog = () => {
 }
 
 function handleSaveMeeting() {
+  if (!meetingFormRef.value) return;
   meetingFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
       try {
@@ -236,6 +257,8 @@ function handleSaveMeeting() {
             message: '會議時間衝突，請重新選擇',
             type: 'warning',
           });
+          meetingFormRef.value.resetFields('startTime');
+          meetingFormRef.value.resetFields('endTime');
           return;
         }
 
@@ -244,9 +267,9 @@ function handleSaveMeeting() {
             message: '會議更新成功!',
             type: 'success',
           });
-          
+
           originalMeeting.value = { ...meeting.value };
-          
+
           mode.value = 'read';
         } else {
           ElMessage.error('會議更新失敗');
@@ -290,7 +313,7 @@ function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
       status: 'DECLINED'
     })),
     ...(meeting.value.noResponses || []).map((user: any) => ({
-      userId: typeof user === 'string' ? user : user.userId, 
+      userId: typeof user === 'string' ? user : user.userId,
       status: 'INVITED'
     }))
   ];
@@ -371,7 +394,23 @@ const handleCloseDeleteMeetingDialog = () => {
 
 const cancelEdit = () => {
   mode.value = 'read';
-  meeting.value = originalMeeting.value ? { ...originalMeeting.value } : {}; // Reset to original meeting data
+  meeting.value = originalMeeting.value ? { ...originalMeeting.value } : {
+    title: '',
+    label: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    location: '',
+    link: '',
+    attendees: [],
+    absentees: [],
+    noResponses: [],
+    agendaItems: [],
+    description: '',
+    meetingNote: '',
+    comments: '', // Added missing comments property
+  }; // Reset to original meeting data
 };
 
 const handleDeleteMeeting = async () => {
@@ -405,7 +444,23 @@ const handleDeleteMeeting = async () => {
 
 }
 
-const originalMeeting = ref({});
+const originalMeeting = ref<RuleForm>({
+  title: '',
+  label: '',
+  startDate: '',
+  startTime: '',
+  endDate: '',
+  endTime: '',
+  location: '',
+  link: '',
+  attendees: [],
+  absentees: [],
+  noResponses: [],
+  agendaItems: [],
+  description: '',
+  meetingNote: '',
+  comments: ''
+});
 
 const handleEdit = () => {
   mode.value = 'edit';
@@ -439,17 +494,19 @@ const fetchSingleMeeting = async () => {
         link: responseData.link,
         attendees: responseData.acceptedParticipants.map((participant: any) => participant.userId),
         absentees: responseData.declinedParticipants.map((participant: any) => participant.userId),
-        noResponses:  responseData.invitedParticipants.map((participant: any) => participant.userId),
+        noResponses: responseData.invitedParticipants.map((participant: any) => participant.userId),
         agendaItems: responseData.agendaItems,
         description: responseData.description,
+        meetingNote: responseData.meetingRecord || '', // Added meetingNote property
+        comments: responseData.comments || '', // Added comments property
       };
       participantsData.value = {
         invitedParticipants: responseData.invitedParticipants,
         acceptedParticipants: responseData.acceptedParticipants,
         declinedParticipants: responseData.declinedParticipants,
       };
-      
-      
+
+
 
     } else {
       console.error('會議資訊獲取失敗', responseData);
@@ -465,24 +522,22 @@ const disabledDate = (time: Date) => {
   return time.getTime() < today.getTime();
 }
 
-const validateEndTime = (_: any, value: string, callback: Function) => {
+const validateAgendaStartTime = (_: any, value: string, callback: Function) => {
   if (!value) {
-    return callback(new Error('請選擇結束時間'));
-  } else if (agendaItemForm.value.startTime && value <= agendaItemForm.value.startTime) {
+    return callback(new Error('請選擇時間'));
+  } else if (agendaItemForm.value.endTime && agendaItemForm.value.startTime >= agendaItemForm.value.endTime) {
     return callback(new Error('結束時間必須晚於開始時間'));
   }
   callback();
-  agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
 };
 
-const validateStartTime = (_: any, value: string, callback: Function) => {
+const validateAgendaEndTime = (_: any, value: string, callback: Function) => {
   if (!value) {
-    return callback(new Error('請選擇開始時間'));
-  } else if (agendaItemForm.value.endTime && value >= agendaItemForm.value.endTime) {
-    return callback(new Error('開始時間必須早於結束時間'));
+    return callback(new Error('請選擇時間'));
+  } else if (agendaItemForm.value.startTime && agendaItemForm.value.startTime >= agendaItemForm.value.endTime) {
+    return callback(new Error('結束時間必須晚於開始時間'));
   }
   callback();
-  agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
 };
 
 const fakeTableData = ref<{ id: number; title: string; startTime: string; endTime: string }[]>([
@@ -490,7 +545,54 @@ const fakeTableData = ref<{ id: number; title: string; startTime: string; endTim
   // { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
 ]);
 
+const validateEndTime = (_: any, value: string, callback: Function) => {
+  // console.log('validateEndTime', value, agendaItemForm.value.startTime)
+  if (!value) {
+    return callback(new Error('請選擇結束時間'));
+  } else if (
+    meeting.value.startTime &&
+    meeting.value.endTime &&
+    meeting.value.startDate === meeting.value.endDate &&
+    meeting.value.startTime >= meeting.value.endTime
+  ) {
+    console.log
+    return callback(new Error('結束時間必須晚於開始時間'));
+  }
+  else if(
+    meeting.value.startDate &&
+    meeting.value.endDate &&
+    meeting.value.startTime >= meeting.value.endTime
+  ) {
+    return callback(new Error('結束時間必須晚於開始時間'));
+  }
+  callback();
+  // agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
+};
+
+const validateStartTime = (_: any, value: string, callback: Function) => {
+  // console.log('validateStartTime', value, agendaItemForm.value.endTime)
+  if (!value) {
+    return callback(new Error('請選擇開始時間'));
+  } else if (
+    meeting.value.startTime &&
+    meeting.value.endTime &&
+    meeting.value.startDate === meeting.value.endDate &&
+    meeting.value.startTime >= meeting.value.endTime
+  ) {
+    return callback(new Error('開始時間必須早於結束時間'));
+  }else if (
+    meeting.value.startDate &&
+    meeting.value.endDate &&
+    meeting.value.startTime >= meeting.value.endTime
+  ) {
+    return callback(new Error('開始時間必須早於結束時間'));
+  }
+  callback();
+  // agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
+};
+
 const validateStartDate = (_: any, value: string, callback: Function) => {
+  // console.log('validateStartDate', value, meeting.value.endDate)
   if (!value) {
     return callback(new Error('請選擇開始日期'));
   } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
@@ -500,6 +602,7 @@ const validateStartDate = (_: any, value: string, callback: Function) => {
 };
 
 const validateEndDate = (_: any, value: string, callback: Function) => {
+  // console.log('validateEndDate', value, meeting.value.startDate)
   if (!value) {
     return callback(new Error('請選擇結束日期'));
   } else if (meeting.value.startDate && new Date(value) < new Date(meeting.value.startDate)) {
@@ -507,6 +610,20 @@ const validateEndDate = (_: any, value: string, callback: Function) => {
   }
   callback();
 };
+
+const rules = reactive<FormRules<RuleForm>>({
+  title: [{ required: true, message: '請輸入標題', trigger: 'change' }],
+  startDate: [{ required: true, validator: validateStartDate, trigger: 'change' }],
+  endDate: [{ required: true, validator: validateEndDate, trigger: 'change' }],
+  startTime: [{ required: true, validator: validateStartTime, trigger: 'change' }],
+  endTime: [{ required: true, validator: validateEndTime, trigger: 'change' }],
+})
+
+const agendaRules = reactive<FormRules<any>>({
+  title: [{ required: true, message: '請輸入標題', trigger: 'change' }],
+  startTime: [{ required: true, validator: validateAgendaStartTime, trigger: 'change' }],
+  endTime: [{ required: true, validator: validateAgendaEndTime, trigger: 'change' }],
+})
 
 onMounted(async () => {
   const user = localStorage.getItem('user');
