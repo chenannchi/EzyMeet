@@ -23,11 +23,11 @@
         <el-form-item label="標籤" label-position="top">
           <el-input v-model="meeting.label" placeholder="請輸入標籤" :disabled="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="開始日期" label-position="top" prop="startDate">
+        <el-form-item label="開始日期" label-position="top">
           <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate"
             :disabled="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="開始時間" label-position="top" prop="startTime">
+        <el-form-item label="開始時間" label-position="top">
           <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" :disabled="mode === 'read'" />
         </el-form-item>
         <el-form-item label="結束日期" label-position="top" prop="endDate">
@@ -545,67 +545,64 @@ const fakeTableData = ref<{ id: number; title: string; startTime: string; endTim
   // { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
 ]);
 
+function areSameDay(date1: string | Date, date2: string | Date) {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+
+  return d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
+}
+
 const validateEndTime = (_: any, value: string, callback: Function) => {
-  // console.log('validateEndTime', value, agendaItemForm.value.startTime)
-  if (!value) {
-    return callback(new Error('請選擇結束時間'));
-  } else if (
-    meeting.value.startTime &&
-    meeting.value.endTime &&
-    meeting.value.startDate === meeting.value.endDate &&
-    meeting.value.startTime >= meeting.value.endTime
-  ) {
-    console.log
-    return callback(new Error('結束時間必須晚於開始時間'));
-  }
-  else if(
-    meeting.value.startDate &&
-    meeting.value.endDate &&
-    meeting.value.startTime >= meeting.value.endTime
-  ) {
-    return callback(new Error('結束時間必須晚於開始時間'));
-  }
-  callback();
-  // agendaItemFormRef.value.clearValidate('startTime'); // Clear start time validation if end time is valid
-};
-
-const validateStartTime = (_: any, value: string, callback: Function) => {
-  // console.log('validateStartTime', value, agendaItemForm.value.endTime)
-  if (!value) {
-    return callback(new Error('請選擇開始時間'));
-  } else if (
-    meeting.value.startTime &&
-    meeting.value.endTime &&
-    meeting.value.startDate === meeting.value.endDate &&
-    meeting.value.startTime >= meeting.value.endTime
-  ) {
-    return callback(new Error('開始時間必須早於結束時間'));
-  }else if (
-    meeting.value.startDate &&
-    meeting.value.endDate &&
-    meeting.value.startTime >= meeting.value.endTime
-  ) {
-    return callback(new Error('開始時間必須早於結束時間'));
-  }
-  callback();
-  // agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
-};
-
-const validateStartDate = (_: any, value: string, callback: Function) => {
-  // console.log('validateStartDate', value, meeting.value.endDate)
   if (!value) {
     return callback(new Error('請選擇開始日期'));
-  } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
-    return callback(new Error('開始日期必須早於結束日期'));
+  } else if (
+    areSameDay(meeting.value.startDate, meeting.value.endDate) &&
+    meeting.value.startTime && meeting.value.startTime >= value) {
+    meetingFormRef.value.resetFields('endTime');
+    return callback(new Error('結束時間必須晚於開始時間'));
   }
   callback();
 };
 
+// const validateStartTime = (_: any, value: string, callback: Function) => {
+//   // console.log('validateStartTime', value, agendaItemForm.value.endTime)
+//   if (!value) {
+//     return callback(new Error('請選擇開始時間'));
+//   } else if (
+//     meeting.value.startTime &&
+//     meeting.value.endTime &&
+//     meeting.value.startDate === meeting.value.endDate &&
+//     meeting.value.startTime >= meeting.value.endTime
+//   ) {
+//     return callback(new Error('開始時間必須早於結束時間'));
+//   }else if (
+//     meeting.value.startDate &&
+//     meeting.value.endDate &&
+//     meeting.value.startTime >= meeting.value.endTime
+//   ) {
+//     return callback(new Error('開始時間必須早於結束時間'));
+//   }
+//   callback();
+//   // agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
+// };
+
+// const validateStartDate = (_: any, value: string, callback: Function) => {
+//   // console.log('validateStartDate', value, meeting.value.endDate)
+//   if (!value) {
+//     return callback(new Error('請選擇開始日期'));
+//   } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
+//     return callback(new Error('開始日期必須早於結束日期'));
+//   }
+//   callback();
+// };
 const validateEndDate = (_: any, value: string, callback: Function) => {
-  // console.log('validateEndDate', value, meeting.value.startDate)
   if (!value) {
     return callback(new Error('請選擇結束日期'));
   } else if (meeting.value.startDate && new Date(value) < new Date(meeting.value.startDate)) {
+    meetingFormRef.value.resetFields('endDate');
+    meetingFormRef.value.resetFields('endTime');
     return callback(new Error('結束日期必須晚於開始日期'));
   }
   callback();
@@ -613,9 +610,9 @@ const validateEndDate = (_: any, value: string, callback: Function) => {
 
 const rules = reactive<FormRules<RuleForm>>({
   title: [{ required: true, message: '請輸入標題', trigger: 'change' }],
-  startDate: [{ required: true, validator: validateStartDate, trigger: 'change' }],
+  startDate: [{ required: true, message: '請輸入開始日期', trigger: 'change' }],
   endDate: [{ required: true, validator: validateEndDate, trigger: 'change' }],
-  startTime: [{ required: true, validator: validateStartTime, trigger: 'change' }],
+  startTime: [{ required: true, message: '請輸入開始時間', trigger: 'change' }],
   endTime: [{ required: true, validator: validateEndTime, trigger: 'change' }],
 })
 
