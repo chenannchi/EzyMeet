@@ -113,7 +113,7 @@
         </el-form-item>
       </div>
     </el-form>
-    <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-[120px]">刪除會議</el-button>
+    <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-[120px]" v-if="mode==='edit'">刪除會議</el-button>
   </div>
   <el-dialog v-model="agendaItemDialog" :before-close="handleCloseAgendaItemDialog">
     <el-form ref="agendaItemFormRef" style="" :model="agendaItemForm" label-width="auto" status-icon
