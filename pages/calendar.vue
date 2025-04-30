@@ -508,14 +508,18 @@ onMounted(async () => {
 </script>
 <style scoped lang="scss">
 .page-container {
-  padding-top: 50px;
+  padding-top: 0;
+  padding-bottom: 0;
   // padding: 20px;
   display: flex;
   // flex-direction: column;
-  width: 100%;
+  width: 90%;
   // gap: 20px;
-  max-width: 90vw;
+  max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   gap: 20px;
 
@@ -523,10 +527,10 @@ onMounted(async () => {
     width: 60%;
 
     :deep(tr) {
-      height: 150px;
+      // height: 150px;
 
       >* {
-        height: 150px !important;
+        height: 60px !important;
 
       }
 
