@@ -268,6 +268,11 @@ async function handleCreateMeeting() {
         meetingFormRef.value.resetFields('startTime');
         meetingFormRef.value.resetFields('endTime');
         return;
+      }else if (response.status === 200){
+        ElMessage({
+          message: '會議已成功建立',
+          type: 'success',
+        });
       }
 
       if (!response.ok) throw new Error('Failed to create meeting');
