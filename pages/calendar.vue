@@ -469,7 +469,7 @@ const fetchAllMeetingsByUserId = async (userId: string) => {
 
 const handleGetParticipantsOptions = async () => {
   try {
-    const response = await fetch('http://localhost:8080/user/participant-options', {
+    const response = await fetch(`http://localhost:8080/user/participant-options/${userId.value}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
