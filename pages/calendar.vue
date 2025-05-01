@@ -591,8 +591,8 @@ onMounted(async () => {
 </script>
 <style scoped lang="scss">
 .page-container {
-  padding-top: 0;
-  padding-bottom: 0;
+  padding: 40px 0;
+  // padding-bottom: 20px;
   // padding: 20px;
   display: flex;
   // flex-direction: column;
