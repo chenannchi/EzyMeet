@@ -104,16 +104,19 @@
       </div>
       <div>
         <el-form-item label="會議記錄" label-position="top" class="meetingNote">
-          <el-input v-model="meeting.meetingNote" type="textarea" placeholder="請輸入會議記錄" :rows="25"
-            :disabled="mode === 'read'" />
+          <el-input v-if="meetingFinished" v-model="meeting.meetingNote" type="textarea" placeholder="請輸入會議記錄"
+            :rows="25" :disabled="mode === 'read'" />
+          <div v-else class="w-full border border-2 border-dashed h-[200px] text-center self-center">尚未開放會議記錄專區</div>
         </el-form-item>
         <el-form-item label="留言" label-position="top" class="comments">
-          <el-input v-model="meeting.comments" type="textarea" placeholder="請輸入留言" :rows="5"
+          <el-input v-if="meetingFinished" v-model="meeting.comments" type="textarea" placeholder="請輸入留言" :rows="5"
             :disabled="mode === 'read'" />
+          <div v-else>尚未開放留言專區</div>
         </el-form-item>
       </div>
     </el-form>
-    <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-[120px]" v-if="mode==='edit'">刪除會議</el-button>
+    <el-button type="danger" @click="deleteMeetingDialog = true" class="!w-[120px]"
+      v-if="mode === 'edit'">刪除會議</el-button>
   </div>
   <el-dialog v-model="agendaItemDialog" :before-close="handleCloseAgendaItemDialog">
     <el-form ref="agendaItemFormRef" style="" :model="agendaItemForm" label-width="auto" status-icon
@@ -171,6 +174,7 @@ const agendaItemsData = ref<any[]>([]);
 const deleteMeetingDialog = ref(false)
 const agendaItemDialog = ref(false)
 const agendaCreateMode = ref(true)
+
 
 const participantsData = ref<any>({
   invitedParticipants: [],
@@ -234,6 +238,9 @@ const handleCloseAgendaItemDialog = () => {
 
   agendaItemDialog.value = false
 }
+
+const meetingFinished = ref(false)
+
 
 function handleSaveMeeting() {
   if (!meetingFormRef.value) return;
@@ -634,6 +641,7 @@ onMounted(async () => {
       endTime: item.endTime,
     };
   });
+  meetingFinished.value = meeting.value.endDate <= new Date() && meeting.value.endTime < new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 })
 </script>
 
