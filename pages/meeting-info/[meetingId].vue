@@ -17,17 +17,17 @@
     <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form" :rules="rules">
       <div>
 
-        <el-form-item label="標題" label-position="top">
+        <el-form-item label="標題" label-position="top" prop="title">
           <el-input v-model="meeting.title" placeholder="請輸入標題" :disabled="mode === 'read'" prop="title" />
         </el-form-item>
         <el-form-item label="標籤" label-position="top">
           <el-input v-model="meeting.label" placeholder="請輸入標籤" :disabled="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="開始日期" label-position="top">
+        <el-form-item label="開始日期" label-position="top" prop="startDate">
           <el-date-picker v-model="meeting.startDate" type="date" placeholder="請選擇開始日期" :disabled-date="disabledDate"
             :disabled="mode === 'read'" />
         </el-form-item>
-        <el-form-item label="開始時間" label-position="top">
+        <el-form-item label="開始時間" label-position="top" prop="startTime">
           <el-time-select v-model="meeting.startTime" step="00:15" placeholder="請選擇開始時間" :disabled="mode === 'read'" />
         </el-form-item>
         <el-form-item label="結束日期" label-position="top" prop="endDate">
