@@ -87,9 +87,6 @@ figure {
   padding: 52px 24px 150px;
   justify-content: center;
   align-items: center;
-  // background-color: #f0f2f5;
-  // height: fit-content;
-  // flex-direction: row !important;
 }
 
 .el-button {
@@ -107,65 +104,10 @@ figure {
   }
 }
 
-.el-button--success:not(.is-link) {
-  background-color: $secondary !important;
-  border: $secondary !important;
-  color: $primary !important;
-
-  &:hover {
-    background-color: color.adjust($secondary, $lightness: -10%) !important;
-    border: color.adjust($secondary, $lightness: -10%) !important;
-  }
-}
 
 .el-button.is-link {
   width: auto !important;
 }
-
-.el-progress-bar {
-  .el-progress-bar__inner {
-    background-color: $primary !important;
-  }
-}
-
-.el-steps {
-  // margin: 50px auto;
-
- .el-step {
-
-    .el-step__head.is-success{
-      color: $primary !important;
-      border-color: $primary !important;
-
-      .el-step__line-inner, .el-step__line {
-        background-color: $primary !important;
-      }
-    }
-
-    .el-step__head.is-process{
-      color: #b56088;
-      border-color: #b56088;
-    }
-
-    .el-step__main {
-      .el-step__title {
-        color: $primary !important;
-
-        &.is-wait{
-          color: #A8ABB2 !important;
-        }
-
-        &.is-process{
-          color: #b56088 !important;
-        }
-      }
-
-      
-
-    }
-  }
-}
-
 
 
 .el-dialog{

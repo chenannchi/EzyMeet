@@ -9,6 +9,10 @@
     <!-- <el-menu-item index="3" @click="useRouter().push({ path: '/member_center' })">會員中心</el-menu-item> -->
     <!-- <el-menu-item index="4" @click="useRouter().push({ path: '/order/cart' })">購物車</el-menu-item> -->
     <!-- <el-menu-item v-if="!user" index="5" @click="loginDialogStore.showLoginDialog">登入/註冊</el-menu-item> -->
+    <el-menu-item v-if="user">
+      <button @click="show = !show"><el-icon><BellFilled /></el-icon></button>
+      <CustomNotificationList v-if="show" />
+    </el-menu-item>
     <el-menu-item v-if="user" index="5" @click="logoutDialogVisible = true">登出</el-menu-item>
   </el-menu>
   <el-dialog v-model="loginDialogStore.loginDialogVisible" :before-close="handleCloseLoginDialog">
@@ -78,7 +82,7 @@
 
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus';
-
+import { BellFilled } from '@element-plus/icons-vue';
 
 const { user, isLoading, login, logout, getIdToken } = useAuth()
 const activeIndex = ref('1')
@@ -88,6 +92,7 @@ const logoutDialogVisible = ref(false);
 
 const loginRuleFormRef = ref<FormInstance | null>(null);
 const registerRuleFormRef = ref<FormInstance | null>(null);
+const show = ref(false)
 
 const loginDialogStore = useLoginDialogStore();
 // const userStore = useUserStore();

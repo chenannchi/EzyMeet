@@ -330,10 +330,7 @@ function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
     host: userId.value,
     location: meeting.value.location,
     link: meeting.value.link,
-    participants: meeting.value.invitees.map((userId: any) => ({
-      userId: String(userId),
-      status: 'INVITED',
-    })),
+    participants: meeting.value.invitees,
     description: meeting.value.description,
   };
 }
