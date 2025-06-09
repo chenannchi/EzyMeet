@@ -332,6 +332,11 @@ function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
     link: meeting.value.link,
     participants: meeting.value.invitees,
     description: meeting.value.description,
+    agendaItems: agendaItemsData.value.map((item: any) => ({
+      topic: item.title,
+      startTime: item.startTime,
+      endTime: item.endTime,
+    })),
   };
 }
 
