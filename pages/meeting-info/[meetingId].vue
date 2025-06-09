@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center w-full">
       <div class="text-2xl font-bold w-full">會議資訊</div>
       <el-button type="default" @click="$router.push('/calendar')" class="!w-[120px]">返回日曆</el-button>
-      <el-button v-if="mode === 'read' && userId !== meeting.host" type="primary" class="mr-auto !w-[120px]"
+      <el-button v-if="mode === 'read' && userId === meeting.host" type="primary" class="mr-auto !w-[120px]"
         @click="handleEdit">
         編輯
       </el-button>
@@ -256,7 +256,6 @@ function handleSaveMeeting() {
   meetingFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        console.log('meeting', meeting.value);
         const { startTimeStamp, endTimeStamp } = generateTimestamps();
         const requestBody = createRequestBody(startTimeStamp, endTimeStamp);
 
@@ -345,6 +344,11 @@ function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
     participants: allParticipants,
     description: meeting.value.description || '',
     meetingRecord: meeting.value.meetingNote || '',
+    agendaItems: agendaItemsData.value.map(item => ({
+    topic: item.title,
+    startTime: item.startTime,
+    endTime: item.endTime
+    }))
   };
 }
 
@@ -354,10 +358,7 @@ function createRequestBody(startTimeStamp: any, endTimeStamp: any) {
 const handleAddAgendaItem = () => {
   agendaItemFormRef.value.validate((valid: boolean) => {
     if (valid) {
-      console.log('add agenda item');
-      console.log('agendaItemForm', agendaItemForm.value);
       agendaItemsData.value.push({ ...agendaItemForm.value });
-      console.log('agendaItemsData', agendaItemsData.value);
       agendaItemDialog.value = false;
       agendaItemForm.value = {
         title: '',
@@ -440,7 +441,6 @@ const handleDeleteMeeting = async () => {
 
     const responseData = await response.text();
 
-    console.log('response', response.status);
 
     if (response.status === 200) {
 
@@ -494,7 +494,6 @@ const fetchSingleMeeting = async () => {
 
     const responseData = await response.json();
 
-    console.log('responseData', responseData);
     if (response.status === 200) {
       const responseStartDate = responseData.timeslot.startDate
       const responseEndDate = responseData.timeslot.endDate
@@ -512,7 +511,11 @@ const fetchSingleMeeting = async () => {
         attendees: responseData.acceptedParticipants.map((participant: any) => participant.userId),
         absentees: responseData.declinedParticipants.map((participant: any) => participant.userId),
         noResponses: responseData.invitedParticipants.map((participant: any) => participant.userId),
-        agendaItems: responseData.agendaItems,
+        agendaItems: responseData.agendaItems.map((item: any) => ({
+          title: item.topic,
+          startTime: item.startTime,
+          endTime: item.endTime,
+        })),
         description: responseData.description,
         meetingNote: responseData.meetingRecord || '', // Added meetingNote property
         comments: responseData.comments || '', // Added comments property
@@ -523,7 +526,11 @@ const fetchSingleMeeting = async () => {
         declinedParticipants: responseData.declinedParticipants,
       };
 
-
+      agendaItemsData.value = responseData.agendaItems.map((item: any) => ({
+        title: item.topic,
+        startTime: item.startTime,
+        endTime: item.endTime,
+      }));
 
     } else {
       console.error('會議資訊獲取失敗', responseData);
@@ -557,11 +564,6 @@ const validateAgendaEndTime = (_: any, value: string, callback: Function) => {
   callback();
 };
 
-const fakeTableData = ref<{ id: number; title: string; startTime: string; endTime: string }[]>([
-  // { id: 1, title: '會議議程1', startTime: '09:00', endTime: '10:00' },
-  // { id: 2, title: '會議議程2', startTime: '10:00', endTime: '11:00' },
-]);
-
 function areSameDay(date1: string | Date, date2: string | Date) {
   const d1 = new Date(date1);
   const d2 = new Date(date2);
@@ -583,37 +585,6 @@ const validateEndTime = (_: any, value: string, callback: Function) => {
   callback();
 };
 
-// const validateStartTime = (_: any, value: string, callback: Function) => {
-//   // console.log('validateStartTime', value, agendaItemForm.value.endTime)
-//   if (!value) {
-//     return callback(new Error('請選擇開始時間'));
-//   } else if (
-//     meeting.value.startTime &&
-//     meeting.value.endTime &&
-//     meeting.value.startDate === meeting.value.endDate &&
-//     meeting.value.startTime >= meeting.value.endTime
-//   ) {
-//     return callback(new Error('開始時間必須早於結束時間'));
-//   }else if (
-//     meeting.value.startDate &&
-//     meeting.value.endDate &&
-//     meeting.value.startTime >= meeting.value.endTime
-//   ) {
-//     return callback(new Error('開始時間必須早於結束時間'));
-//   }
-//   callback();
-//   // agendaItemFormRef.value.clearValidate('endTime'); // Clear end time validation if start time is valid
-// };
-
-// const validateStartDate = (_: any, value: string, callback: Function) => {
-//   // console.log('validateStartDate', value, meeting.value.endDate)
-//   if (!value) {
-//     return callback(new Error('請選擇開始日期'));
-//   } else if (meeting.value.endDate && new Date(value) > new Date(meeting.value.endDate)) {
-//     return callback(new Error('開始日期必須早於結束日期'));
-//   }
-//   callback();
-// };
 const validateEndDate = (_: any, value: string, callback: Function) => {
   if (!value) {
     return callback(new Error('請選擇結束日期'));
@@ -643,14 +614,6 @@ onMounted(async () => {
   const user = localStorage.getItem('user');
   userId.value = user ? JSON.parse(user).id : '';
   await fetchSingleMeeting();
-  agendaItemsData.value = fakeTableData.value.map((item) => {
-    return {
-      id: item.id,
-      title: item.title,
-      startTime: item.startTime,
-      endTime: item.endTime,
-    };
-  });
   meetingFinished.value = meeting.value.endDate <= new Date() && meeting.value.endTime < new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 })
 </script>
