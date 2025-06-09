@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center w-full">
       <div class="text-2xl font-bold w-full">會議資訊</div>
       <el-button type="default" @click="$router.push('/calendar')" class="!w-[120px]">返回日曆</el-button>
-      <el-button v-if="mode === 'read'" type="primary" class="mr-auto !w-[120px]" @click="handleEdit">
+      <el-button v-if="mode === 'read' && userId !== meeting.host" type="primary" class="mr-auto !w-[120px]" @click="handleEdit">
         編輯
       </el-button>
       <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="handleSaveMeeting">
@@ -184,6 +184,7 @@ const participantsData = ref<any>({
 });
 
 interface RuleForm {
+  host?: string; // Optional host property
   title: string;
   label: string;
   startDate: string | Date;
@@ -491,6 +492,7 @@ const fetchSingleMeeting = async () => {
       const responseEndDate = responseData.timeslot.endDate
       meeting.value =
       {
+        host: responseData.host,
         title: responseData.title,
         label: responseData.label,
         startDate: new Date(responseStartDate),
