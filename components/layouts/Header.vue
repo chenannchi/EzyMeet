@@ -11,7 +11,7 @@
     <!-- <el-menu-item v-if="!user" index="5" @click="loginDialogStore.showLoginDialog">登入/註冊</el-menu-item> -->
     <el-menu-item v-if="user">
       <button @click="show = !show"><el-icon><BellFilled /></el-icon></button>
-      <CustomNotificationList v-if="show" />
+      <CustomNotificationList v-if="show" @closeNotification="handleCloseNotification" />
     </el-menu-item>
     <el-menu-item v-if="user" index="5" @click="logoutDialogVisible = true">登出</el-menu-item>
   </el-menu>
@@ -93,6 +93,10 @@ const logoutDialogVisible = ref(false);
 const loginRuleFormRef = ref<FormInstance | null>(null);
 const registerRuleFormRef = ref<FormInstance | null>(null);
 const show = ref(false)
+
+function handleCloseNotification() {
+  show.value = false;
+}
 
 const loginDialogStore = useLoginDialogStore();
 // const userStore = useUserStore();

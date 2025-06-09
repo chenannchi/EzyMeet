@@ -14,7 +14,7 @@
       </el-button>
     </div>
     <el-divider class="!my-2"></el-divider>
-    <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form" :rules="rules">
+    <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form" :rules="rules" v-loading="meeting.title === ''">
       <div>
 
         <el-form-item label="標題" label-position="top" prop="title">

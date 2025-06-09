@@ -4,13 +4,22 @@
       v-for="notification in notifications"
       :key="notification.id"
       class="notification-card"
+      @click="handleClickNotification(notification)"
     >
       <h4 class="font-semibold">{{ notification.title }}</h4>
       <p class="text-gray-600 text-sm">{{ formatDate(notification.createdAt) }}</p>
 
-      <div v-if="notification.status === 'PENDING'"  class="mt-2 flex gap-2">
-        <el-button type="success" class="!w-1/2 !m-0" @click="respond(notification.id, 'ACCEPTED')">Accept</el-button>
-        <el-button type="danger" class="!w-1/2 !m-0" @click="respond(notification.id, 'REJECTED')">Reject</el-button>
+      <div v-if="notification.status === 'PENDING'" class="mt-2 flex gap-2">
+        <el-button
+          type="success"
+          class="!w-1/2 !m-0"
+          @click.stop="() => replyInvitation(notification.id, 'ACCEPTED')"
+        >Accept</el-button>
+        <el-button
+          type="danger"
+          class="!w-1/2 !m-0"
+          @click.stop="() => replyInvitation(notification.id, 'REJECTED')"
+        >Reject</el-button>
       </div>
 
       <div v-else class="mt-2 text-sm text-gray-500">
@@ -42,11 +51,27 @@ const fetchNotifications = async () => {
   }
 }
 
-const respond = async (id, status) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300))
-  const notif = notifications.value.find(n => n.id === id)
-  if (notif) notif.status = status
+const replyInvitation = async (id, status) => {
+  try {
+    const res = await fetch(`http://localhost:8080/notifications/replyInvitation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationId: id, status: status }),
+    })
+    if (!res.ok) throw new Error('Failed to update notification')
+    await fetchNotifications() // Refresh notifications after responding
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const emit = defineEmits(['close-notification'])
+
+const handleClickNotification = (notification) => {
+  // Handle notification click, e.g., navigate to a specific page or show details
+  // console.log('Notification clicked:', notification)
+  useRouter().push(`/meeting-info/${notification.meetingId}`)
+  emit('close-notification')
 }
 
 const formatDate = (dateStr) => {
