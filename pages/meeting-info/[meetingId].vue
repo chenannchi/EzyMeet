@@ -3,7 +3,8 @@
     <div class="flex justify-between items-center w-full">
       <div class="text-2xl font-bold w-full">會議資訊</div>
       <el-button type="default" @click="$router.push('/calendar')" class="!w-[120px]">返回日曆</el-button>
-      <el-button v-if="mode === 'read' && userId !== meeting.host" type="primary" class="mr-auto !w-[120px]" @click="handleEdit">
+      <el-button v-if="mode === 'read' && userId !== meeting.host" type="primary" class="mr-auto !w-[120px]"
+        @click="handleEdit">
         編輯
       </el-button>
       <el-button v-if="mode === 'edit'" type="success" class="mr-auto !w-[120px]" @click="handleSaveMeeting">
@@ -14,7 +15,8 @@
       </el-button>
     </div>
     <el-divider class="!my-2"></el-divider>
-    <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form" :rules="rules" v-loading="meeting.title === ''">
+    <el-form ref="meetingFormRef" :model="meeting" label-width="100px" class="meeting-form" :rules="rules"
+      v-loading="meeting.title === ''">
       <div>
 
         <el-form-item label="標題" label-position="top" prop="title">
@@ -49,22 +51,28 @@
         </el-select>
       </el-form-item> -->
         <el-form-item label="出席者" label-position="top" class="attendees !w-full">
+          <!-- <el-select v-model="meeting.attendees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
+            placeholder="" :disabled="mode === 'read'" suffix-icon=""> -->
           <el-select v-model="meeting.attendees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
-            placeholder="" :disabled="mode === 'read'" suffix-icon="">
+            placeholder="" suffix-icon="">
             <el-option v-for="attendee in participantsData.acceptedParticipants" :key="attendee.userId"
               :label="attendee.name + ' <' + attendee.email + '>'" :value="attendee.userId" />
           </el-select>
         </el-form-item>
         <el-form-item label="不出席者" label-position="top" class="absentees !w-full">
+          <!-- <el-select v-model="meeting.absentees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
+            placeholder="" :disabled="mode === 'read'" suffix-icon=""> -->
           <el-select v-model="meeting.absentees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
-            placeholder="" :disabled="mode === 'read'" suffix-icon="">
+            placeholder="" suffix-icon="">
             <el-option v-for="absentee in participantsData.declinedParticipants" :key="absentee.userId"
               :label="absentee.name + ' <' + absentee.email + '>'" :value="absentee.userId" />
           </el-select>
         </el-form-item>
         <el-form-item label="尚未回覆者" label-position="top" class="noResponses !w-full">
+          <!-- <el-select v-model="meeting.noResponses" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
+            placeholder="" :disabled="mode === 'read'" suffix-icon=""> -->
           <el-select v-model="meeting.noResponses" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
-            placeholder="" :disabled="mode === 'read'" suffix-icon="">
+            placeholder="" suffix-icon="">
             <el-option v-for="participant in participantsData.invitedParticipants" :key="participant.userId"
               :label="participant.name + ' <' + participant.email + '>'" :value="participant.userId" />
           </el-select>
