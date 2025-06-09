@@ -54,7 +54,7 @@
           <!-- <el-select v-model="meeting.attendees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
             placeholder="" :disabled="mode === 'read'" suffix-icon=""> -->
           <el-select v-model="meeting.attendees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
-            placeholder="" suffix-icon="">
+            placeholder="" disabled suffix-icon="">
             <el-option v-for="attendee in participantsData.acceptedParticipants" :key="attendee.userId"
               :label="attendee.name + ' <' + attendee.email + '>'" :value="attendee.userId" />
           </el-select>
@@ -63,7 +63,7 @@
           <!-- <el-select v-model="meeting.absentees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
             placeholder="" :disabled="mode === 'read'" suffix-icon=""> -->
           <el-select v-model="meeting.absentees" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
-            placeholder="" suffix-icon="">
+            placeholder="" disabled suffix-icon="">
             <el-option v-for="absentee in participantsData.declinedParticipants" :key="absentee.userId"
               :label="absentee.name + ' <' + absentee.email + '>'" :value="absentee.userId" />
           </el-select>
@@ -72,7 +72,7 @@
           <!-- <el-select v-model="meeting.noResponses" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
             placeholder="" :disabled="mode === 'read'" suffix-icon=""> -->
           <el-select v-model="meeting.noResponses" multiple collapse-tags collapse-tags-tooltip :max-collapse-tags="3"
-            placeholder="" suffix-icon="">
+            placeholder="" disabled suffix-icon="">
             <el-option v-for="participant in participantsData.invitedParticipants" :key="participant.userId"
               :label="participant.name + ' <' + participant.email + '>'" :value="participant.userId" />
           </el-select>
