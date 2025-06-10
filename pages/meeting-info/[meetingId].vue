@@ -610,6 +610,30 @@ const agendaRules = reactive<FormRules<any>>({
   endTime: [{ required: true, validator: validateAgendaEndTime, trigger: 'change' }],
 })
 
+// const route = useRoute();
+// const router = useRouter();
+
+// Watch for route changes, including query parameters
+watch(
+  () => route.query,
+  (query) => {
+    // If refresh parameter exists, refetch the meeting data
+    if (query.refresh === 'true') {
+      fetchSingleMeeting();
+      
+      // Remove the refresh parameter after fetching
+      // This prevents unnecessary refreshes if the user reloads the page
+      router.replace({ 
+        path: route.path,
+        query: {} 
+      });
+    }
+  },
+  { immediate: true }
+);
+
+
+
 onMounted(async () => {
   const user = localStorage.getItem('user');
   userId.value = user ? JSON.parse(user).id : '';
