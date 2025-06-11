@@ -1,22 +1,29 @@
 <template>
   <div class="notifitcation-list">
-    <div v-for="notification in notifications" :key="notification.id" class="notification-card"
+    <template v-if="notifications.length === 0">
+      <div class="notification-card text-center text-gray-500">
+      No notifications.
+      </div>
+    </template>
+    <template v-else>
+      <div v-for="notification in notifications" :key="notification.id" class="notification-card"
       @click="handleClickNotification(notification)">
       <h4 class="font-semibold">{{ notification.title }}</h4>
       <p class="text-gray-600 text-sm">{{ formatDate(notification.createdAt) }}</p>
 
       <div v-if="notification.status === 'PENDING'" class="mt-2 flex gap-2">
         <el-button type="success" class="!w-1/2 !m-0"
-          @click.stop="() => replyInvitation(notification.id, 'ACCEPTED')">Accept</el-button>
+        @click.stop="() => replyInvitation(notification.id, 'ACCEPTED')">Accept</el-button>
         <el-button type="danger" class="!w-1/2 !m-0"
-          @click.stop="() => replyInvitation(notification.id, 'REJECTED')">Reject</el-button>
+        @click.stop="() => replyInvitation(notification.id, 'REJECTED')">Reject</el-button>
       </div>
 
       <div v-else class="mt-2 text-sm text-gray-500">
         Meeting "{{ notification.title }}" has been
         {{ notification.status === 'ACCEPTED' ? 'accepted' : notification.status === 'REJECTED' ? 'rejected' : 'updated' }}.
       </div>
-    </div>
+      </div>
+    </template>
   </div>
 </template>
 
