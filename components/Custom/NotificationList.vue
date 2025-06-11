@@ -64,7 +64,7 @@ const replyInvitation = async (id, status) => {
 
     // After successful response
     const notification = notifications.value.find(n => n.id === id)
-    emit('close-notification')
+    // emit('close-notification')
 
     // Check the current route
     const onMeetingInfoPage = route.path.startsWith('/meeting-info/')
